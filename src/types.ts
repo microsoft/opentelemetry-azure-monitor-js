@@ -1,0 +1,23 @@
+import { ExportResult } from '@opentelemetry/base';
+import { Envelope } from './Declarations/Contracts';
+
+export type Tags = { [key: string]: string };
+export type Properties = { [key: string]: string };
+export type TelemetryProcessor = (envelope: Envelope) => boolean | void;
+export type SenderCallback = (err: Error | null, exportResult: ExportResult, result?: string) => void;
+
+export interface BaseExporter {
+  addTelemetryProcessor(processor: TelemetryProcessor): void;
+  clearTelemetryProcessors(): void;
+  exportEnvelopes(envelopes: Envelope[], resultCallback: (result: ExportResult) => void): void;
+}
+
+export interface Sender {
+  send(payload: unknown[], callback: SenderCallback): void;
+  shutdown(): void;
+}
+
+export interface PersistentStorage {
+  shift(cb: (err: Error | null, value?: unknown) => void): void;
+  push(value: unknown, cb: (err: Error | null, result?: boolean) => void): void;
+}

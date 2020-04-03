@@ -1,0 +1,42 @@
+{
+  "name": "opentelemetry-azure-monitor-js",
+  "version": "0.0.0",
+  "description": "Application Insights exporter for the Open Telemetry JavaScript (Node.js) SDK",
+  "main": "build/index.js",
+  "private": true,
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "eslint src --ext .ts",
+    "build": "tsc -p ./tsconfig.json"
+  },
+  "engines": {
+    "node": ">=8.3.0"
+  },
+  "author": "appinsightssdk@microsoft.com",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/mocha": "^7.0.2",
+    "@types/node": "^13.9.8",
+    "@typescript-eslint/eslint-plugin": "^2.26.0",
+    "eslint": "^6.8.0",
+    "eslint-config-airbnb-typescript": "^7.2.0",
+    "eslint-config-prettier": "^6.10.1",
+    "eslint-plugin-import": "^2.20.2",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-prettier": "^3.1.2",
+    "husky": "^4.2.3",
+    "lerna": "^3.20.2",
+    "lerna-changelog": "^1.0.1",
+    "mocha": "^7.1.1",
+    "nyc": "^15.0.0",
+    "prettier": "^2.0.2",
+    "tslint": "^6.1.0",
+    "typescript": "^3.8.3"
+  },
+  "dependencies": {
+    "@opentelemetry/api": "^0.5.2",
+    "@opentelemetry/base": "^0.5.2",
+    "@opentelemetry/core": "^0.5.2",
+    "@opentelemetry/tracing": "^0.5.2"
+  }
+}
