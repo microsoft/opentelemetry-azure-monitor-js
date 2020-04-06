@@ -4,7 +4,12 @@ import { Envelope } from './Declarations/Contracts';
 export type Tags = { [key: string]: string };
 export type Properties = { [key: string]: string };
 export type TelemetryProcessor = (envelope: Envelope) => boolean | void;
-export type SenderCallback = (err: Error | null, exportResult: ExportResult, result?: string) => void;
+export type SenderCallback = (
+  err: Error | null,
+  exportResult: ExportResult,
+  statusCode: number,
+  result?: string,
+) => void;
 
 export interface BaseExporter {
   addTelemetryProcessor(processor: TelemetryProcessor): void;

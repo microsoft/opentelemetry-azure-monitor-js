@@ -13,7 +13,7 @@ export class NoopSender implements Sender {
 
   send(payload: Envelope[], callback: SenderCallback): void {
     this._logger.info('Sending payload', payload);
-    callback(null, ExportResult.SUCCESS);
+    callback(null, ExportResult.SUCCESS, 200);
   }
 
   shutdown(): void {

@@ -5,9 +5,9 @@
   "main": "build/index.js",
   "private": true,
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "lint": "eslint src --ext .ts",
-    "build": "tsc -p ./tsconfig.json"
+    "build": "tsc -p ./tsconfig.json",
+    "lint": "eslint . --ext .ts,.js",
+    "test": "ts-mocha -p ./tsconfig.json test/**/*.test.ts"
   },
   "engines": {
     "node": ">=8.3.0"
@@ -30,6 +30,7 @@
     "mocha": "^7.1.1",
     "nyc": "^15.0.0",
     "prettier": "^2.0.2",
+    "ts-mocha": "^7.0.0",
     "tslint": "^6.1.0",
     "typescript": "^3.8.3"
   },
