@@ -47,23 +47,10 @@ class RequestData extends Domain {
    */
   public url: string | undefined;
 
-  /**
-   * Collection of custom properties.
-   */
-  public properties: any;
-
-  /**
-   * Collection of custom measurements.
-   */
-  public measurements: any;
-
   constructor() {
     super();
 
     this.ver = 2;
-
-    this.properties = {};
-    this.measurements = {};
   }
 }
 export = RequestData;

@@ -53,23 +53,11 @@ class RemoteDependencyData extends Domain {
    */
   public type: string | undefined;
 
-  /**
-   * Collection of custom properties.
-   */
-  public properties: any;
-
-  /**
-   * Collection of custom measurements.
-   */
-  public measurements: any;
-
   constructor() {
     super();
 
     this.ver = 2;
     this.success = true;
-    this.properties = {};
-    this.measurements = {};
   }
 }
 export = RemoteDependencyData;

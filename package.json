@@ -7,7 +7,7 @@
   "scripts": {
     "build": "tsc -p ./tsconfig.json",
     "lint": "eslint . --ext .ts,.js",
-    "test": "ts-mocha -p ./tsconfig.json test/**/*.test.ts"
+    "test": "ts-mocha -p ./tsconfig.json 'test/**/*.test.ts'"
   },
   "engines": {
     "node": ">=8.3.0"
@@ -28,8 +28,10 @@
     "lerna": "^3.20.2",
     "lerna-changelog": "^1.0.1",
     "mocha": "^7.1.1",
+    "nock": "^12.0.3",
     "nyc": "^15.0.0",
     "prettier": "^2.0.2",
+    "sinon": "^9.0.1",
     "ts-mocha": "^7.0.0",
     "tslint": "^6.1.0",
     "typescript": "^3.8.3"
