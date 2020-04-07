@@ -16,6 +16,10 @@ module.exports = {
     'no-underscore-dangle': [ 'error', { allowAfterThis: true }],
     'node/no-unsupported-features/es-syntax': ['error', { ignores: ['modules'] }],
     'import/prefer-default-export': 'off',
+    "import/no-extraneous-dependencies": ["error", {"devDependencies": true}],
+    "node/no-unpublished-import": ["error", {
+        "allowModules": ["@opentelemetry/api", "@opentelemetry/tracing"]
+    }],
   },
   parser: '@typescript-eslint/parser',
   parserOptions: {

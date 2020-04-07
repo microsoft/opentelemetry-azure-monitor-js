@@ -15,6 +15,8 @@
   "author": "appinsightssdk@microsoft.com",
   "license": "MIT",
   "devDependencies": {
+    "@opentelemetry/api": "^0.5.2",
+    "@opentelemetry/tracing": "^0.5.2",
     "@types/mocha": "^7.0.2",
     "@types/node": "^13.9.8",
     "@typescript-eslint/eslint-plugin": "^2.26.0",
@@ -37,9 +39,7 @@
     "typescript": "^3.8.3"
   },
   "dependencies": {
-    "@opentelemetry/api": "^0.5.2",
     "@opentelemetry/base": "^0.5.2",
-    "@opentelemetry/core": "^0.5.2",
-    "@opentelemetry/tracing": "^0.5.2"
+    "@opentelemetry/core": "^0.5.2"
   }
 }
