@@ -1,7 +1,7 @@
 {
   "name": "opentelemetry-azure-monitor-js",
   "version": "0.0.0",
-  "description": "Application Insights exporter for the Open Telemetry JavaScript (Node.js) SDK",
+  "description": "Application Insights exporter for the OpenTelemetry JavaScript (Node.js) SDK",
   "main": "build/index.js",
   "private": true,
   "scripts": {
