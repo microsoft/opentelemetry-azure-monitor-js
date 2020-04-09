@@ -60,7 +60,7 @@ function getACLArguments(directory: string, identity: string) {
 }
 
 export class FileSystemPersist implements PersistentStorage {
-  static TEMPDIR_PREFIX = 'ot-azure-exporter';
+  static TEMPDIR_PREFIX = 'ot-azure-exporter-';
 
   maxBytesOnDisk: number = 50_000_000; // ~50MB
 
@@ -90,7 +90,7 @@ export class FileSystemPersist implements PersistentStorage {
 
   push(value: unknown, cb: (err: Error | null, result?: boolean | undefined) => void): void {
     this._logger.info('Pushing value to persistent storage', value as string);
-    this._storeToDisk(value, cb);
+    this._storeToDisk(JSON.stringify(value), cb);
   }
 
   shift(cb: (err: Error | null, value?: unknown) => void): void {
