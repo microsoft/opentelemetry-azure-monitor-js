@@ -95,24 +95,27 @@ describe('FileSystemPersist', () => {
     it('should get the first file on disk and return it', (done) => {
       const persister = new FileSystemPersist({ instrumentationKey });
 
-      const firstBatch = [{ foo: `bar-${Date.now()}` }, { first: 'batch' }];
-      const secondBatch = [{ foo: 'bar' }, { second: 'batch' }];
+      const firstBatch = [{ batch: 'first' }];
+      const secondBatch = [{ batch: 'second' }];
       persister.push(firstBatch, (err1, success1) => {
         assert.strictEqual(err1, null);
         assert.strictEqual(success1, true);
-        persister.push(secondBatch, (err2, success2) => {
-          assert.strictEqual(err2, null);
-          assert.strictEqual(success2, true);
-          persister.shift((errRead1, value1) => {
-            assert.strictEqual(errRead1, null);
-            assert.deepStrictEqual(value1, firstBatch);
-            persister.shift((errRead2, value2) => {
-              assert.strictEqual(errRead2, null);
-              assert.deepStrictEqual(value2, secondBatch);
-              done();
+        setTimeout(() => {
+          // wait 1 ms so that we don't overwrite previous file
+          persister.push(secondBatch, (err2, success2) => {
+            assert.strictEqual(err2, null);
+            assert.strictEqual(success2, true);
+            persister.shift((errRead1, value1) => {
+              assert.strictEqual(errRead1, null);
+              assert.deepStrictEqual(value1, firstBatch);
+              persister.shift((errRead2, value2) => {
+                assert.strictEqual(errRead2, null);
+                assert.deepStrictEqual(value2, secondBatch);
+                done();
+              });
             });
           });
-        });
+        }, 1);
       });
     });
   });
