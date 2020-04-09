@@ -1,12 +1,13 @@
 import { ExportResult } from '@opentelemetry/base';
 import { Logger } from '@opentelemetry/api';
 import { NoopLogger } from '@opentelemetry/core';
-import { Envelope } from '../Declarations/Contracts';
+import { Envelope, ENV_CONNECTION_STRING, ENV_INSTRUMENTATION_KEY } from '../Declarations/Contracts';
 import { NoopSender } from '../platform';
 import { ExporterConfig, DEFAULT_EXPORTER_CONFIG } from '../config';
 import { BaseExporter, TelemetryProcessor } from '../types';
 import { ArrayPersist } from '../platform/nodejs/arrayPersist';
 import { isRetriable } from '../utils/breezeUtils';
+import { ConnectionStringParser } from '../utils/connectionStringParser';
 
 export abstract class AzureMonitorBaseExporter implements BaseExporter {
   private readonly _persister: ArrayPersist<Envelope[]>; // @todo: replace with FileSystemPersister
@@ -17,13 +18,27 @@ export abstract class AzureMonitorBaseExporter implements BaseExporter {
 
   protected _telemetryProcessors: TelemetryProcessor[];
 
-  constructor(options: ExporterConfig = DEFAULT_EXPORTER_CONFIG) {
+  constructor(public options: ExporterConfig = DEFAULT_EXPORTER_CONFIG) {
+    const connectionString = options.connectionString || process.env[ENV_CONNECTION_STRING];
+    const instrumentationKey = options.instrumentationKey || process.env[ENV_INSTRUMENTATION_KEY];
     this._logger = options.logger || new NoopLogger();
 
     // Instrumentation key is required
-    // @todo: parse connection strings
-    if (!options.instrumentationKey) {
-      this._logger.error('No instrumentation key was provided to the Azure Monitor Exporter');
+    if (!instrumentationKey && !connectionString) {
+      this._logger.error(
+        'No instrumentation key or connection string was provided to the Azure Monitor Exporter',
+      );
+      // @todo: figure out what state the exporter should be left in here
+    }
+
+    if (connectionString) {
+      const parsedConnectionString = ConnectionStringParser.parse(options.connectionString);
+      this.options = {
+        ...options,
+        // Overwrite options with connection string results, if any
+        instrumentationKey: parsedConnectionString.instrumentationkey || instrumentationKey,
+        endpointUrl: parsedConnectionString.ingestionendpoint || options.endpointUrl,
+      };
     }
 
     this._telemetryProcessors = [];
