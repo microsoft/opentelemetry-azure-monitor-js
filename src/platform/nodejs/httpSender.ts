@@ -4,13 +4,13 @@ import { Logger } from '@opentelemetry/api';
 import { NoopLogger } from '@opentelemetry/core';
 import { Sender, SenderCallback } from '../../types';
 import { Envelope } from '../../Declarations/Contracts';
-import { DEFAULT_SENDER_OPTIONS } from '../types';
+import { DEFAULT_SENDER_OPTIONS, NodejsPlatformConfig } from '../types';
 import { makeRequest } from './utils/httpUtils';
 
 export class HttpSender implements Sender {
   private readonly _logger: Logger;
 
-  constructor(private _options = DEFAULT_SENDER_OPTIONS) {
+  constructor(private _options: NodejsPlatformConfig = DEFAULT_SENDER_OPTIONS) {
     this._logger = _options.logger || new NoopLogger();
   }
 

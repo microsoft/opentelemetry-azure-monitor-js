@@ -12,6 +12,12 @@ import nock = require('nock');
 
 describe('#AzureMonitorBaseExporter', () => {
   class TestExporter extends AzureMonitorBaseExporter {
+    constructor() {
+      super({
+        instrumentationKey: 'foo', // Compile test: assert that oneOf(ikey, cs) is required
+      });
+    }
+
     getTelemetryProcesors() {
       return this._telemetryProcessors;
     }

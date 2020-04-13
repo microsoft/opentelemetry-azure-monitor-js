@@ -2,7 +2,7 @@ import * as http from 'http';
 import * as https from 'https';
 import * as url from 'url';
 import { constants } from 'crypto';
-import { SenderOptions } from '../../types';
+import { NodejsPlatformConfig } from '../../types';
 
 const tlsRestrictedAgent = new https.Agent(<any>{
   secureOptions:
@@ -14,7 +14,7 @@ const tlsRestrictedAgent = new https.Agent(<any>{
 });
 
 export function makeRequest(
-  config: SenderOptions,
+  config: NodejsPlatformConfig,
   endpointUrl: string,
   requestOptions: http.RequestOptions | https.RequestOptions,
   requestCallback: (res: http.IncomingMessage) => void,

@@ -15,7 +15,8 @@
     "strictNullChecks": true,
     "target": "es2015",
     "incremental": true,
-    "outDir": "build"
+    "outDir": "build",
+    "lib": []
   },
   "include": [
     "src/**/*.ts",
