@@ -1,10 +1,9 @@
-/* eslint-disable no-param-reassign */
 import { URL } from 'url';
 import { ReadableSpan } from '@opentelemetry/tracing';
 import { hrTimeToMilliseconds } from '@opentelemetry/core';
 import { SpanKind, Logger, CanonicalCode, Link } from '@opentelemetry/api';
-import { Envelope, RequestData, RemoteDependencyData } from '../Declarations/Contracts';
-import { Tags, Properties } from '../types';
+import { Envelope, RequestData, RemoteDependencyData, Base } from '../Declarations/Contracts';
+import { Tags, Properties, MSLink } from '../types';
 
 function createTagsFromSpan(span: ReadableSpan): Tags {
   const tags: Tags = {};
@@ -27,30 +26,18 @@ function createTagsFromSpan(span: ReadableSpan): Tags {
 function createPropertiesFromSpan(span: ReadableSpan): Properties {
   const properties: Properties = {};
 
-  // @todo: is this for RequestData only?
-  // @todo: parse grpc attributes where appropriate
-  if (span.kind === SpanKind.SERVER || span.kind === SpanKind.CONSUMER) {
-    if (span.attributes['http.method']) {
-      if (span.attributes['http.route']) {
-        properties['request.name'] = `${span.attributes['http.method']} ${span.attributes['http.route']}`;
-      } else if (span.attributes['http.path']) {
-        properties['request.name'] = `${span.attributes['http.method']} ${span.attributes['http.path']}`;
-      }
-    }
-  }
-
-  // @todo: ignore grpc attributes
   Object.keys(span.attributes).forEach((key: string) => {
-    if (!key.startsWith('http.')) {
+    if (!(key.startsWith('http.') || key.startsWith('grpc.'))) {
       properties[key] = span.attributes[key] as string;
     }
   });
 
-  const links = span.links.map((link: Link) => ({
+  const links: MSLink[] = span.links.map((link: Link) => ({
     operation_Id: link.context.traceId,
     id: link.context.spanId,
   }));
-  properties['_MS.links'] = JSON.stringify(links);
+
+  properties['_MS.links'] = links;
 
   return properties;
 }
@@ -60,15 +47,14 @@ function createDependencyData(span: ReadableSpan): RemoteDependencyData {
   data.name = span.name;
   data.id = `|${span.spanContext.traceId}.${span.spanContext.spanId}.`;
   data.success = span.status.code === CanonicalCode.OK;
-  data.resultCode = span.attributes['http.status_code'] as string;
+  data.resultCode = String(span.status.code);
   data.target = span.attributes['http.url'] as string;
   data.type = 'HTTP';
   data.duration = String(hrTimeToMilliseconds(span.duration));
   data.ver = 1;
-  data.baseType = 'RemoteDependencyData';
 
   if (span.attributes['http.status_code']) {
-    data.resultCode = span.attributes['http.status_code'] as string;
+    data.resultCode = String(span.attributes['http.status_code']);
   }
 
   if (span.attributes['http.url']) {
@@ -77,7 +63,7 @@ function createDependencyData(span: ReadableSpan): RemoteDependencyData {
     data.data = url.href;
 
     if (span.attributes['http.method']) {
-      data.name = `${span.attributes['http.method']} /${url.pathname}`;
+      data.name = `${span.attributes['http.method']} ${url.pathname}`;
     }
   }
 
@@ -86,20 +72,19 @@ function createDependencyData(span: ReadableSpan): RemoteDependencyData {
 
 function createRequestData(span: ReadableSpan): RequestData {
   const data = new RequestData();
-  data.baseType = 'RequestData';
   data.name = span.name;
   data.id = `|${span.spanContext.traceId}.${span.spanContext.spanId}.`;
   data.success = span.status.code === CanonicalCode.OK;
   data.responseCode = String(span.status.code);
   data.duration = String(hrTimeToMilliseconds(span.duration));
   data.ver = 1;
-  // data.source = @todo
+  data.source = undefined;
 
   if (span.attributes['http.method']) {
     data.name = span.attributes['http.method'] as string;
 
     if (span.attributes['http.status_code']) {
-      data.responseCode = span.attributes['http.status_code'] as string;
+      data.responseCode = String(span.attributes['http.status_code']);
     }
 
     if (span.attributes['http.url']) {
@@ -108,6 +93,9 @@ function createRequestData(span: ReadableSpan): RequestData {
 
     if (span.attributes['http.route']) {
       data.name = `${span.attributes['http.method']} ${span.attributes['http.route']}`;
+    } else if (span.attributes['http.url']) {
+      const url = new URL(span.attributes['http.url'] as string);
+      data.name = `${span.attributes['http.method']} ${url.pathname}`;
     }
   }
 
@@ -129,6 +117,7 @@ export function readableSpanToEnvelope(
   logger?: Logger,
 ): Envelope {
   const envelope = new Envelope();
+  envelope.data = new Base();
   const tags = createTagsFromSpan(span);
   const properties = createPropertiesFromSpan(span);
   let data;
@@ -136,14 +125,17 @@ export function readableSpanToEnvelope(
     case SpanKind.CLIENT:
     case SpanKind.PRODUCER:
       envelope.name = 'Microsoft.ApplicationInsights.RemoteDependency';
+      envelope.data.baseType = 'RemoteDependencyData';
       data = createDependencyData(span);
       break;
     case SpanKind.SERVER:
     case SpanKind.CONSUMER:
       envelope.name = 'Microsoft.ApplicationInsights.Request';
+      envelope.data.baseType = 'RequestData';
       data = createRequestData(span);
       break;
     case SpanKind.INTERNAL:
+      envelope.data.baseType = 'RemoteDependencyData';
       envelope.name = 'Microsoft.ApplicationInsights.RemoteDependency';
       data = createInProcData(span);
       break;
@@ -155,7 +147,7 @@ export function readableSpanToEnvelope(
       throw new Error(`Unsupported span kind ${span.kind}`);
   }
 
-  envelope.data = { ...data, properties };
+  envelope.data.baseData = { ...data, properties };
   envelope.tags = tags;
   envelope.time = new Date().toISOString();
   envelope.iKey = instrumentationKey;
