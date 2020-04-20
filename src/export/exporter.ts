@@ -32,7 +32,7 @@ export abstract class AzureMonitorBaseExporter implements BaseExporter {
     }
 
     if (connectionString) {
-      const parsedConnectionString = ConnectionStringParser.parse(options.connectionString);
+      const parsedConnectionString = ConnectionStringParser.parse(connectionString);
       this.options = {
         ...options,
         // Overwrite options with connection string results, if any
