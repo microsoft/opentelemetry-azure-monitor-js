@@ -4,6 +4,7 @@ import * as url from 'url';
 import { constants } from 'crypto';
 import { NodejsPlatformConfig } from '../../types';
 
+// Used when sending via HTTPS without a passed in agent. Use one that enforces our TLS rules
 const tlsRestrictedAgent = new https.Agent(<any>{
   secureOptions:
     // eslint-disable-next-line no-bitwise

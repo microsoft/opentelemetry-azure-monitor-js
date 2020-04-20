@@ -1,6 +1,6 @@
 import { ExportResult } from '@opentelemetry/base';
 import { Logger } from '@opentelemetry/api';
-import { NoopLogger } from '@opentelemetry/core';
+import { ConsoleLogger, LogLevel } from '@opentelemetry/core';
 import { Envelope } from '../Declarations/Contracts';
 import { HttpSender } from '../platform';
 import { DEFAULT_EXPORTER_CONFIG, AzureExporterConfig } from '../config';
@@ -22,7 +22,7 @@ export abstract class AzureMonitorBaseExporter implements BaseExporter {
   private readonly _options: AzureExporterConfig;
 
   constructor(_options: Partial<AzureExporterConfig> = DEFAULT_EXPORTER_CONFIG) {
-    this._logger = _options.logger || new NoopLogger();
+    this._logger = _options.logger || new ConsoleLogger(LogLevel.ERROR);
     this._options = {
       ...DEFAULT_EXPORTER_CONFIG,
       ..._options,
@@ -73,8 +73,10 @@ export abstract class AzureMonitorBaseExporter implements BaseExporter {
             (acc, v) => [...acc, envelopes[v.index]],
             [] as Envelope[],
           );
+          // calls resultCallback(ExportResult) based on result of persister.push
           this._persister.push(filteredEnvelopes, persistCb);
         } else {
+          // calls resultCallback(ExportResult) based on result of persister.push
           this._persister.push(envelopes, persistCb);
         }
       } else {
@@ -124,8 +126,6 @@ export abstract class AzureMonitorBaseExporter implements BaseExporter {
         this._sender.send(envelopes, () => {
           /** no-op */
         });
-      } else {
-        this._logger.info(`No file was found in persistent storage`);
       }
     });
   }

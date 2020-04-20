@@ -1,7 +1,7 @@
 import * as http from 'http';
 import * as zlib from 'zlib';
 import { Logger } from '@opentelemetry/api';
-import { NoopLogger } from '@opentelemetry/core';
+import { ConsoleLogger, LogLevel } from '@opentelemetry/core';
 import { Sender, SenderCallback } from '../../types';
 import { Envelope } from '../../Declarations/Contracts';
 import { DEFAULT_SENDER_OPTIONS, NodejsPlatformConfig } from '../types';
@@ -11,7 +11,7 @@ export class HttpSender implements Sender {
   private readonly _logger: Logger;
 
   constructor(private _options: NodejsPlatformConfig = DEFAULT_SENDER_OPTIONS) {
-    this._logger = _options.logger || new NoopLogger();
+    this._logger = _options.logger || new ConsoleLogger(LogLevel.ERROR);
   }
 
   send(envelopes: Envelope[], callback: SenderCallback): void {
