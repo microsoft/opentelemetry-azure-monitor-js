@@ -2,18 +2,17 @@ import { ExportResult } from '@opentelemetry/base';
 import { Logger } from '@opentelemetry/api';
 import { NoopLogger } from '@opentelemetry/core';
 import { Envelope } from '../Declarations/Contracts';
-import { NoopSender } from '../platform';
+import { NoopSender, FileSystemPersist } from '../platform';
 import { ExporterConfig, DEFAULT_EXPORTER_CONFIG } from '../config';
-import { BaseExporter, TelemetryProcessor } from '../types';
-import { ArrayPersist } from '../platform/nodejs/arrayPersist';
+import { BaseExporter, TelemetryProcessor, PersistentStorage, Sender } from '../types';
 import { isRetriable } from '../utils/breezeUtils';
 
 export abstract class AzureMonitorBaseExporter implements BaseExporter {
-  private readonly _persister: ArrayPersist<Envelope[]>; // @todo: replace with FileSystemPersister
+  private readonly _persister: PersistentStorage;
 
   protected readonly _logger: Logger;
 
-  private readonly _sender: NoopSender;
+  private readonly _sender: Sender;
 
   protected _telemetryProcessors: TelemetryProcessor[];
 
@@ -28,7 +27,7 @@ export abstract class AzureMonitorBaseExporter implements BaseExporter {
 
     this._telemetryProcessors = [];
     this._sender = new NoopSender();
-    this._persister = new ArrayPersist<Envelope[]>();
+    this._persister = new FileSystemPersist();
   }
 
   exportEnvelopes(payload: Envelope[], resultCallback: (result: ExportResult) => void): void {
