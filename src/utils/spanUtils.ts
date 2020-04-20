@@ -4,21 +4,29 @@ import { hrTimeToMilliseconds } from '@opentelemetry/core';
 import { SpanKind, Logger, CanonicalCode, Link } from '@opentelemetry/api';
 import { Envelope, RequestData, RemoteDependencyData, Base } from '../Declarations/Contracts';
 import { Tags, Properties, MSLink } from '../types';
+import { HTTP_METHOD, HTTP_ROUTE, HTTP_URL, HTTP_STATUS_CODE } from './constants/span/httpAttributes';
+import {
+  AI_OPERATION_ID,
+  AI_OPERATION_PARENT_ID,
+  AI_OPERATIION_NAME,
+  MS_LINKS,
+  INPROC,
+} from './constants/applicationinsights';
 
 function createTagsFromSpan(span: ReadableSpan): Tags {
   const tags: Tags = {};
-  tags['ai.operation.id'] = span.spanContext.traceId;
+  tags[AI_OPERATION_ID] = span.spanContext.traceId;
   if (span.parentSpanId) {
-    tags['ai.operation.parentId'] = span.parentSpanId;
+    tags[AI_OPERATION_PARENT_ID] = span.parentSpanId;
   }
   // @todo: is this for RequestData only?
   // @todo: parse grpc attributes where appropriate
   if (
     (span.kind === SpanKind.SERVER || span.kind === SpanKind.CONSUMER) &&
-    span.attributes['http.method'] &&
-    span.attributes['http.route']
+    span.attributes[HTTP_METHOD] &&
+    span.attributes[HTTP_ROUTE]
   ) {
-    tags['ai.operation.name'] = `${span.attributes['http.method']} ${span.attributes['http.route']}`;
+    tags[AI_OPERATIION_NAME] = `${span.attributes[HTTP_METHOD]} ${span.attributes[HTTP_ROUTE]}`;
   }
   return tags;
 }
@@ -37,7 +45,7 @@ function createPropertiesFromSpan(span: ReadableSpan): Properties {
     id: link.context.spanId,
   }));
 
-  properties['_MS.links'] = links;
+  properties[MS_LINKS] = links;
 
   return properties;
 }
@@ -48,22 +56,23 @@ function createDependencyData(span: ReadableSpan): RemoteDependencyData {
   data.id = `|${span.spanContext.traceId}.${span.spanContext.spanId}.`;
   data.success = span.status.code === CanonicalCode.OK;
   data.resultCode = String(span.status.code);
-  data.target = span.attributes['http.url'] as string;
-  data.type = 'HTTP';
+  data.target = span.attributes[HTTP_URL] as string;
+  data.type = 'Dependency';
   data.duration = String(hrTimeToMilliseconds(span.duration));
   data.ver = 1;
 
-  if (span.attributes['http.status_code']) {
-    data.resultCode = String(span.attributes['http.status_code']);
+  if (span.attributes[HTTP_STATUS_CODE]) {
+    data.type = 'HTTP';
+    data.resultCode = String(span.attributes[HTTP_STATUS_CODE]);
   }
 
-  if (span.attributes['http.url']) {
-    const url = new URL(span.attributes['http.url'] as string);
+  if (span.attributes[HTTP_URL]) {
+    const url = new URL(span.attributes[HTTP_URL] as string);
     data.target = url.hostname;
     data.data = url.href;
 
-    if (span.attributes['http.method']) {
-      data.name = `${span.attributes['http.method']} ${url.pathname}`;
+    if (span.attributes[HTTP_METHOD]) {
+      data.name = `${span.attributes[HTTP_METHOD]} ${url.pathname}`;
     }
   }
 
@@ -80,22 +89,22 @@ function createRequestData(span: ReadableSpan): RequestData {
   data.ver = 1;
   data.source = undefined;
 
-  if (span.attributes['http.method']) {
-    data.name = span.attributes['http.method'] as string;
+  if (span.attributes[HTTP_METHOD]) {
+    data.name = span.attributes[HTTP_METHOD] as string;
 
-    if (span.attributes['http.status_code']) {
-      data.responseCode = String(span.attributes['http.status_code']);
+    if (span.attributes[HTTP_STATUS_CODE]) {
+      data.responseCode = String(span.attributes[HTTP_STATUS_CODE]);
     }
 
-    if (span.attributes['http.url']) {
-      data.url = span.attributes['http.url'] as string;
+    if (span.attributes[HTTP_URL]) {
+      data.url = span.attributes[HTTP_URL] as string;
     }
 
-    if (span.attributes['http.route']) {
-      data.name = `${span.attributes['http.method']} ${span.attributes['http.route']}`;
-    } else if (span.attributes['http.url']) {
-      const url = new URL(span.attributes['http.url'] as string);
-      data.name = `${span.attributes['http.method']} ${url.pathname}`;
+    if (span.attributes[HTTP_ROUTE]) {
+      data.name = `${span.attributes[HTTP_METHOD]} ${span.attributes[HTTP_ROUTE]}`;
+    } else if (span.attributes[HTTP_URL]) {
+      const url = new URL(span.attributes[HTTP_URL] as string);
+      data.name = `${span.attributes[HTTP_METHOD]} ${url.pathname}`;
     }
   }
 
@@ -106,7 +115,7 @@ function createRequestData(span: ReadableSpan): RequestData {
 
 function createInProcData(span: ReadableSpan): RemoteDependencyData {
   const data = createDependencyData(span);
-  data.type = 'InProc';
+  data.type = INPROC;
   data.success = true;
   return data;
 }
