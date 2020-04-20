@@ -14,7 +14,7 @@ describe('#AzureMonitorBaseExporter', () => {
   class TestExporter extends AzureMonitorBaseExporter {
     constructor() {
       super({
-        instrumentationKey: 'foo', // Compile test: assert that oneOf(ikey, cs) is required
+        instrumentationKey: 'foo',
       });
     }
 

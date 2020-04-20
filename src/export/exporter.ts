@@ -3,11 +3,7 @@ import { Logger } from '@opentelemetry/api';
 import { NoopLogger } from '@opentelemetry/core';
 import { Envelope } from '../Declarations/Contracts';
 import { HttpSender } from '../platform';
-import {
-  DEFAULT_EXPORTER_CONFIG,
-  PartialAzureExporterConfigWithSetupString,
-  AzureExporterConfigWithSetupString,
-} from '../config';
+import { DEFAULT_EXPORTER_CONFIG, AzureExporterConfig } from '../config';
 import { BaseExporter, TelemetryProcessor } from '../types';
 import { ArrayPersist } from '../platform/nodejs/persist/arrayPersist';
 import { isRetriable, BreezeResponse } from '../utils/breezeUtils';
@@ -23,13 +19,12 @@ export abstract class AzureMonitorBaseExporter implements BaseExporter {
 
   protected _telemetryProcessors: TelemetryProcessor[];
 
-  private readonly _options: AzureExporterConfigWithSetupString;
+  private readonly _options: AzureExporterConfig;
 
-  constructor(_options: PartialAzureExporterConfigWithSetupString = DEFAULT_EXPORTER_CONFIG) {
+  constructor(_options: Partial<AzureExporterConfig> = DEFAULT_EXPORTER_CONFIG) {
     this._logger = _options.logger || new NoopLogger();
     this._options = {
       ...DEFAULT_EXPORTER_CONFIG,
-      instrumentationKey: undefined, // hack: clear empty string ikey from default config
       ..._options,
     };
 
