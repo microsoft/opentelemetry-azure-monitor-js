@@ -23,14 +23,6 @@ export abstract class AzureMonitorBaseExporter implements BaseExporter {
     const instrumentationKey = options.instrumentationKey || process.env[ENV_INSTRUMENTATION_KEY];
     this._logger = options.logger || new NoopLogger();
 
-    // Instrumentation key is required
-    if (!instrumentationKey && !connectionString) {
-      this._logger.error(
-        'No instrumentation key or connection string was provided to the Azure Monitor Exporter',
-      );
-      // @todo: figure out what state the exporter should be left in here
-    }
-
     if (connectionString) {
       const parsedConnectionString = ConnectionStringParser.parse(connectionString);
       this.options = {
@@ -39,6 +31,14 @@ export abstract class AzureMonitorBaseExporter implements BaseExporter {
         instrumentationKey: parsedConnectionString.instrumentationkey || instrumentationKey,
         endpointUrl: parsedConnectionString.ingestionendpoint || options.endpointUrl,
       };
+    }
+
+    // Instrumentation key is required
+    if (!this.options.instrumentationKey) {
+      const message =
+        'No instrumentation key or connection string was provided to the Azure Monitor Exporter';
+      this._logger.error(message);
+      throw new Error(message);
     }
 
     this._telemetryProcessors = [];
