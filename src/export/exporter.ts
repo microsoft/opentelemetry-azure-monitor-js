@@ -18,7 +18,7 @@ export abstract class AzureMonitorBaseExporter implements BaseExporter {
 
   protected _telemetryProcessors: TelemetryProcessor[];
 
-  constructor(public options: ExporterConfig = DEFAULT_EXPORTER_CONFIG) {
+  constructor(public options: Partial<ExporterConfig> = DEFAULT_EXPORTER_CONFIG) {
     const connectionString = options.connectionString || process.env[ENV_CONNECTION_STRING];
     const instrumentationKey = options.instrumentationKey || process.env[ENV_INSTRUMENTATION_KEY];
     this._logger = options.logger || new NoopLogger();

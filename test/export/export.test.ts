@@ -7,6 +7,12 @@ import { Envelope } from '../../src/Declarations/Contracts';
 
 describe('#AzureMonitorBaseExporter', () => {
   class TestExporter extends AzureMonitorBaseExporter {
+    constructor() {
+      super({
+        instrumentationKey: 'ikey',
+      });
+    }
+
     getTelemetryProcesors() {
       return this._telemetryProcessors;
     }
