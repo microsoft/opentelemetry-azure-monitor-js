@@ -8,10 +8,11 @@ import { HTTP_METHOD, HTTP_ROUTE, HTTP_URL, HTTP_STATUS_CODE } from './constants
 import {
   AI_OPERATION_ID,
   AI_OPERATION_PARENT_ID,
-  AI_OPERATIION_NAME,
+  AI_OPERATION_NAME,
   MS_LINKS,
   INPROC,
 } from './constants/applicationinsights';
+import { GRPC_ERROR_MESSAGE, GRPC_ERROR_NAME, GRPC_METHOD, GRPC_STATUS_CODE } from './constants/span/grpcAttributes';
 
 function createTagsFromSpan(span: ReadableSpan): Tags {
   const tags: Tags = {};
@@ -20,13 +21,15 @@ function createTagsFromSpan(span: ReadableSpan): Tags {
     tags[AI_OPERATION_PARENT_ID] = span.parentSpanId;
   }
   // @todo: is this for RequestData only?
-  // @todo: parse grpc attributes where appropriate
+  if ((span.kind === SpanKind.SERVER || span.kind === SpanKind.CONSUMER) && span.attributes[GRPC_METHOD]) {
+    tags[AI_OPERATION_NAME] = String(span.attributes[GRPC_METHOD]);
+  }
   if (
     (span.kind === SpanKind.SERVER || span.kind === SpanKind.CONSUMER) &&
     span.attributes[HTTP_METHOD] &&
     span.attributes[HTTP_ROUTE]
   ) {
-    tags[AI_OPERATIION_NAME] = `${span.attributes[HTTP_METHOD]} ${span.attributes[HTTP_ROUTE]}`;
+    tags[AI_OPERATION_NAME] = `${span.attributes[HTTP_METHOD]} ${span.attributes[HTTP_ROUTE]}`;
   }
   return tags;
 }
@@ -35,7 +38,11 @@ function createPropertiesFromSpan(span: ReadableSpan): Properties {
   const properties: Properties = {};
 
   Object.keys(span.attributes).forEach((key: string) => {
-    if (!(key.startsWith('http.') || key.startsWith('grpc.'))) {
+    if (
+      key === GRPC_ERROR_MESSAGE ||
+      key === GRPC_ERROR_NAME ||
+      !(key.startsWith('http.') || key.startsWith('grpc.'))
+    ) {
       properties[key] = span.attributes[key] as string;
     }
   });
@@ -46,7 +53,6 @@ function createPropertiesFromSpan(span: ReadableSpan): Properties {
   }));
 
   properties[MS_LINKS] = links;
-
   return properties;
 }
 
@@ -64,6 +70,16 @@ function createDependencyData(span: ReadableSpan): RemoteDependencyData {
   if (span.attributes[HTTP_STATUS_CODE]) {
     data.type = 'HTTP';
     data.resultCode = String(span.attributes[HTTP_STATUS_CODE]);
+  }
+
+  if (span.attributes[GRPC_STATUS_CODE] !== undefined) {
+    data.type = 'GRPC';
+    data.resultCode = String(span.attributes[GRPC_STATUS_CODE]);
+  }
+
+  if (span.attributes[GRPC_METHOD]) {
+    data.target = String(span.attributes[GRPC_METHOD]);
+    data.data = String(span.attributes[GRPC_METHOD]);
   }
 
   if (span.attributes[HTTP_URL]) {
@@ -108,7 +124,12 @@ function createRequestData(span: ReadableSpan): RequestData {
     }
   }
 
-  // @todo: parse grpc attributes
+  if (span.attributes[GRPC_STATUS_CODE]) {
+    data.responseCode = String(span.attributes[GRPC_STATUS_CODE]);
+  }
+  if (span.attributes[GRPC_METHOD]) {
+    data.url = String(span.attributes[GRPC_METHOD]);
+  }
 
   return data;
 }

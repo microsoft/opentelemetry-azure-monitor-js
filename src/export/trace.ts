@@ -1,7 +1,7 @@
 import { ExportResult } from '@opentelemetry/base';
 import { ReadableSpan, SpanExporter } from '@opentelemetry/tracing';
 import { ExporterConfig, DEFAULT_EXPORTER_CONFIG } from '../config';
-import { readableSpanToEnvelope } from '../utils/noopSpanUtils';
+import { readableSpanToEnvelope } from '../utils/spanUtils';
 import { AzureMonitorBaseExporter } from './exporter';
 
 export class AzureMonitorTraceExporter extends AzureMonitorBaseExporter implements SpanExporter {

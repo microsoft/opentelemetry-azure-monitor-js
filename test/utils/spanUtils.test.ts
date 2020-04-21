@@ -6,18 +6,9 @@ import { NoopLogger, hrTimeToMilliseconds } from '@opentelemetry/core';
 import { readableSpanToEnvelope } from '../../src/utils/spanUtils';
 import { Tags, Properties } from '../../src/types';
 import { RequestData, RemoteDependencyData, Envelope } from '../../src/Declarations/Contracts';
-import {
-  HTTP_METHOD,
-  HTTP_ROUTE,
-  HTTP_URL,
-  HTTP_STATUS_CODE,
-} from '../../src/utils/constants/span/httpAttributes';
-import {
-  AI_OPERATION_ID,
-  AI_OPERATION_PARENT_ID,
-  MS_LINKS,
-  AI_OPERATIION_NAME,
-} from '../../src/utils/constants/applicationinsights';
+import * as http from '../../src/utils/constants/span/httpAttributes';
+import * as grpc from '../../src/utils/constants/span/grpcAttributes';
+import * as ai from '../../src/utils/constants/applicationinsights';
 
 const tracer = new BasicTracerProvider({
   logger: new NoopLogger(),
@@ -47,6 +38,120 @@ function assertEnvelope(
 
 describe('spanUtils.ts', () => {
   describe('#readableSpanToEnvelope', () => {
+    describe('GRPC', () => {
+      it('should create a Request Envelope for Server Spans', () => {
+        const span = new Span(
+          tracer,
+          'parent span',
+          { traceId: 'traceid', spanId: 'spanId', traceFlags: 0 },
+          SpanKind.SERVER,
+          'parentSpanId',
+        );
+        span.setAttributes({
+          'extra.attribute': 'foo',
+          [grpc.GRPC_STATUS_CODE]: CanonicalCode.OK,
+          [grpc.GRPC_KIND]: SpanKind.SERVER,
+          [grpc.GRPC_METHOD]: '/foo.Example/Foo',
+          [grpc.GRPC_ERROR_MESSAGE]: 'some error message',
+          [grpc.GRPC_ERROR_NAME]: 'some error name',
+        });
+        span.setStatus({
+          code: CanonicalCode.OK,
+        });
+        span.end();
+        const readableSpan = span.toReadableSpan();
+        const expectedTags: Tags = {
+          [ai.AI_OPERATION_ID]: 'traceid',
+          [ai.AI_OPERATION_PARENT_ID]: 'parentSpanId',
+          [ai.AI_OPERATION_NAME]: '/foo.Example/Foo',
+        };
+        const expectedProperties: Properties = {
+          'extra.attribute': 'foo',
+          [grpc.GRPC_ERROR_MESSAGE]: 'some error message',
+          [grpc.GRPC_ERROR_NAME]: 'some error name',
+          [ai.MS_LINKS]: [],
+        };
+
+        const expectedBaseData: Partial<RequestData> = {
+          source: undefined,
+          duration: String(hrTimeToMilliseconds(readableSpan.duration)),
+          id: `|${span.spanContext.traceId}.${span.spanContext.spanId}.`,
+          success: true,
+          responseCode: '0',
+          url: '/foo.Example/Foo',
+          name: `parent span`,
+          ver: 1,
+          properties: expectedProperties,
+          measurements: {},
+        };
+
+        const envelope = readableSpanToEnvelope(span, 'ikey');
+        assertEnvelope(
+          envelope,
+          'Microsoft.ApplicationInsights.Request',
+          'RequestData',
+          expectedTags,
+          expectedProperties,
+          expectedBaseData,
+        );
+      });
+      it('should create a Dependency Envelope for Client Spans', () => {
+        const span = new Span(
+          tracer,
+          'parent span',
+          { traceId: 'traceid', spanId: 'spanId', traceFlags: 0 },
+          SpanKind.CLIENT,
+          'parentSpanId',
+        );
+        span.setAttributes({
+          'extra.attribute': 'foo',
+          [grpc.GRPC_STATUS_CODE]: CanonicalCode.OK,
+          [grpc.GRPC_KIND]: SpanKind.CLIENT,
+          [grpc.GRPC_METHOD]: '/foo.Example/Foo',
+          [grpc.GRPC_ERROR_MESSAGE]: 'some error message',
+          [grpc.GRPC_ERROR_NAME]: 'some error name',
+        });
+        span.setStatus({
+          code: CanonicalCode.OK,
+        });
+        span.end();
+        const readableSpan = span.toReadableSpan();
+        const expectedTags: Tags = {
+          [ai.AI_OPERATION_ID]: 'traceid',
+          [ai.AI_OPERATION_PARENT_ID]: 'parentSpanId',
+        };
+        const expectedProperties: Properties = {
+          'extra.attribute': 'foo',
+          [grpc.GRPC_ERROR_MESSAGE]: 'some error message',
+          [grpc.GRPC_ERROR_NAME]: 'some error name',
+          [ai.MS_LINKS]: [],
+        };
+
+        const expectedBaseData: Partial<RemoteDependencyData> = {
+          duration: String(hrTimeToMilliseconds(readableSpan.duration)),
+          id: `|${span.spanContext.traceId}.${span.spanContext.spanId}.`,
+          success: true,
+          resultCode: '0',
+          target: '/foo.Example/Foo',
+          data: '/foo.Example/Foo',
+          type: 'GRPC',
+          name: `parent span`,
+          ver: 1,
+          properties: expectedProperties,
+          measurements: {},
+        };
+
+        const envelope = readableSpanToEnvelope(span, 'ikey');
+        assertEnvelope(
+          envelope,
+          'Microsoft.ApplicationInsights.RemoteDependency',
+          'RemoteDependencyData',
+          expectedTags,
+          expectedProperties,
+          expectedBaseData,
+        );
+      });
+    });
     describe('Generic', () => {
       it('should create a Request Envelope for Server Spans', () => {
         const span = new Span(
@@ -65,12 +170,12 @@ describe('spanUtils.ts', () => {
         span.end();
         const readableSpan = span.toReadableSpan();
         const expectedTags: Tags = {
-          [AI_OPERATION_ID]: 'traceid',
-          [AI_OPERATION_PARENT_ID]: 'parentSpanId',
+          [ai.AI_OPERATION_ID]: 'traceid',
+          [ai.AI_OPERATION_PARENT_ID]: 'parentSpanId',
         };
         const expectedProperties: Properties = {
           'extra.attribute': 'foo',
-          [MS_LINKS]: [],
+          [ai.MS_LINKS]: [],
         };
 
         const expectedBaseData: Partial<RequestData> = {
@@ -113,12 +218,12 @@ describe('spanUtils.ts', () => {
         span.end();
         const readableSpan = span.toReadableSpan();
         const expectedTags: Tags = {
-          [AI_OPERATION_ID]: 'traceid',
-          [AI_OPERATION_PARENT_ID]: 'parentSpanId',
+          [ai.AI_OPERATION_ID]: 'traceid',
+          [ai.AI_OPERATION_PARENT_ID]: 'parentSpanId',
         };
         const expectedProperties: Properties = {
           'extra.attribute': 'foo',
-          [MS_LINKS]: [],
+          [ai.MS_LINKS]: [],
         };
 
         const expectedBaseData: Partial<RemoteDependencyData> = {
@@ -156,10 +261,10 @@ describe('spanUtils.ts', () => {
           'parentSpanId',
         );
         span.setAttributes({
-          [HTTP_METHOD]: 'GET',
-          [HTTP_ROUTE]: '/api/example',
-          [HTTP_URL]: 'https://example.com/api/example',
-          [HTTP_STATUS_CODE]: 200,
+          [http.HTTP_METHOD]: 'GET',
+          [http.HTTP_ROUTE]: '/api/example',
+          [http.HTTP_URL]: 'https://example.com/api/example',
+          [http.HTTP_STATUS_CODE]: 200,
           'extra.attribute': 'foo',
         });
         span.setStatus({
@@ -168,13 +273,15 @@ describe('spanUtils.ts', () => {
         span.end();
         const readableSpan = span.toReadableSpan();
         const expectedTags: Tags = {
-          [AI_OPERATION_ID]: 'traceid',
-          [AI_OPERATION_PARENT_ID]: 'parentSpanId',
-          [AI_OPERATIION_NAME]: `${readableSpan.attributes[HTTP_METHOD]} ${readableSpan.attributes[HTTP_ROUTE]}`,
+          [ai.AI_OPERATION_ID]: 'traceid',
+          [ai.AI_OPERATION_PARENT_ID]: 'parentSpanId',
+          [ai.AI_OPERATION_NAME]: `${readableSpan.attributes[http.HTTP_METHOD]} ${
+            readableSpan.attributes[http.HTTP_ROUTE]
+          }`,
         };
         const expectedProperties: Properties = {
           'extra.attribute': 'foo',
-          [MS_LINKS]: [],
+          [ai.MS_LINKS]: [],
         };
 
         const expectedBaseData: RequestData = {
@@ -209,9 +316,9 @@ describe('spanUtils.ts', () => {
           'parentSpanId',
         );
         span.setAttributes({
-          [HTTP_METHOD]: 'GET',
-          [HTTP_URL]: 'https://example.com/api/example',
-          [HTTP_STATUS_CODE]: 200,
+          [http.HTTP_METHOD]: 'GET',
+          [http.HTTP_URL]: 'https://example.com/api/example',
+          [http.HTTP_STATUS_CODE]: 200,
           'extra.attribute': 'foo',
         });
         span.setStatus({
@@ -220,12 +327,12 @@ describe('spanUtils.ts', () => {
         span.end();
         const readableSpan = span.toReadableSpan();
         const expectedTags: Tags = {
-          [AI_OPERATION_ID]: readableSpan.spanContext.traceId,
-          [AI_OPERATION_PARENT_ID]: 'parentSpanId',
+          [ai.AI_OPERATION_ID]: readableSpan.spanContext.traceId,
+          [ai.AI_OPERATION_PARENT_ID]: 'parentSpanId',
         };
         const expectedProperties: Properties = {
           'extra.attribute': 'foo',
-          [MS_LINKS]: [],
+          [ai.MS_LINKS]: [],
         };
 
         const expectedBaseData: RemoteDependencyData = {
