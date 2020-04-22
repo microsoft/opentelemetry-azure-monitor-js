@@ -1,38 +1,48 @@
 import { ExportResult } from '@opentelemetry/base';
 import { Logger } from '@opentelemetry/api';
-import { NoopLogger } from '@opentelemetry/core';
+import { ConsoleLogger, LogLevel } from '@opentelemetry/core';
 import { Envelope } from '../Declarations/Contracts';
-import { NoopSender, FileSystemPersist } from '../platform';
-import { ExporterConfig, DEFAULT_EXPORTER_CONFIG } from '../config';
-import { BaseExporter, TelemetryProcessor, PersistentStorage, Sender } from '../types';
-import { isRetriable } from '../utils/breezeUtils';
+import { HttpSender } from '../platform';
+import { DEFAULT_EXPORTER_CONFIG, AzureExporterConfig } from '../config';
+import { BaseExporter, TelemetryProcessor } from '../types';
+import { ArrayPersist } from '../platform/nodejs/persist/arrayPersist';
+import { isRetriable, BreezeResponse } from '../utils/breezeUtils';
 
 export abstract class AzureMonitorBaseExporter implements BaseExporter {
-  private readonly _persister: PersistentStorage;
+  protected readonly _persister: ArrayPersist<Envelope[]>; // @todo: replace with FileSystemPersister
 
   protected readonly _logger: Logger;
 
-  private readonly _sender: Sender;
+  protected readonly _sender: HttpSender;
+
+  protected _retryTimer: NodeJS.Timeout | null;
 
   protected _telemetryProcessors: TelemetryProcessor[];
 
-  constructor(options: ExporterConfig = DEFAULT_EXPORTER_CONFIG) {
-    this._logger = options.logger || new NoopLogger();
+  private readonly _options: AzureExporterConfig;
+
+  constructor(_options: Partial<AzureExporterConfig> = DEFAULT_EXPORTER_CONFIG) {
+    this._logger = _options.logger || new ConsoleLogger(LogLevel.ERROR);
+    this._options = {
+      ...DEFAULT_EXPORTER_CONFIG,
+      ..._options,
+    };
 
     // Instrumentation key is required
     // @todo: parse connection strings
-    if (!options.instrumentationKey) {
+    if (!_options.instrumentationKey) {
       this._logger.error('No instrumentation key was provided to the Azure Monitor Exporter');
     }
 
     this._telemetryProcessors = [];
-    this._sender = new NoopSender();
-    this._persister = new FileSystemPersist();
+    this._sender = new HttpSender();
+    this._persister = new ArrayPersist<Envelope[]>();
+    this._retryTimer = null;
   }
 
   exportEnvelopes(payload: Envelope[], resultCallback: (result: ExportResult) => void): void {
     const envelopes = this._applyTelemetryProcessors(payload);
-    this._sender.send(envelopes, (err, exportResult, statusCode, resultString) => {
+    this._sender.send(envelopes, (err, statusCode, resultString) => {
       const persistCb = (persistErr: Error | null, persistSuccess?: boolean) => {
         if (persistErr || !persistSuccess) {
           return resultCallback(ExportResult.FAILED_NOT_RETRYABLE);
@@ -41,16 +51,38 @@ export abstract class AzureMonitorBaseExporter implements BaseExporter {
       };
 
       if (err) {
+        // Request failed -- always retry
         this._logger.error(err.message);
         this._persister.push(envelopes, persistCb);
-      } else if (isRetriable(statusCode)) {
+      } else if (statusCode === 200) {
+        // Success -- @todo: start retry timer
+        if (!this._retryTimer) {
+          this._retryTimer = setTimeout(() => {
+            this._retryTimer = null;
+            this._sendFirstPersistedFile();
+          }, this._options.batchSendRetryIntervalMs);
+          this._retryTimer.unref();
+        }
+        resultCallback(ExportResult.SUCCESS);
+      } else if (statusCode && isRetriable(statusCode)) {
+        // Failed -- persist failed data
         if (resultString) {
           this._logger.info(resultString);
+          const breezeResponse: BreezeResponse = JSON.parse(resultString);
+          const filteredEnvelopes = breezeResponse.errors.reduce(
+            (acc, v) => [...acc, envelopes[v.index]],
+            [] as Envelope[],
+          );
+          // calls resultCallback(ExportResult) based on result of persister.push
+          this._persister.push(filteredEnvelopes, persistCb);
+        } else {
+          // calls resultCallback(ExportResult) based on result of persister.push
+          this._persister.push(envelopes, persistCb);
         }
-        // @todo: filter retriable envelopes on partial success (206)
-        this._persister.push(envelopes, persistCb);
+      } else {
+        // Failed -- not retriable
+        resultCallback(ExportResult.FAILED_NOT_RETRYABLE);
       }
-      return resultCallback(exportResult);
     });
   }
 
@@ -84,5 +116,17 @@ export abstract class AzureMonitorBaseExporter implements BaseExporter {
     });
 
     return filteredEnvelopes;
+  }
+
+  private _sendFirstPersistedFile() {
+    this._persister.shift((err, envelopes) => {
+      if (err) {
+        this._logger.warn(`Failed to fetch persisted file`, err);
+      } else if (envelopes) {
+        this._sender.send(envelopes, () => {
+          /** no-op */
+        });
+      }
+    });
   }
 }

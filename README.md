@@ -1,5 +1,10 @@
 
-# Contributing
+# Azure Monitor JavaScript Exporter for OpenTelemetry (Unpublished)
+
+[![codecov](https://codecov.io/gh/microsoft/opentelemetry-azure-monitor-js/branch/master/graph/badge.svg)](https://codecov.io/gh/microsoft/opentelemetry-azure-monitor-js)
+![Node.js CI](https://github.com/microsoft/opentelemetry-azure-monitor-js/workflows/Node.js%20CI/badge.svg)
+
+## Contributing
 
 This project welcomes contributions and suggestions.  Most contributions require you to agree to a
 Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us
