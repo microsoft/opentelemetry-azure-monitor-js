@@ -6,7 +6,6 @@ import Domain = require('./Domain');
  * An instance of Request represents completion of an external request to the application to do work and contains a summary of that request execution and the results.
  */
 class RequestData extends Domain {
-  baseType: 'RequestData' = 'RequestData';
   /**
    * Schema version
    */
