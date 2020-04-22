@@ -3,19 +3,18 @@ import { Logger } from '@opentelemetry/api';
 import { ConsoleLogger, LogLevel } from '@opentelemetry/core';
 import { Envelope } from '../Declarations/Contracts';
 import { ConnectionStringParser } from '../utils/connectionStringParser';
-import { HttpSender } from '../platform';
+import { HttpSender, FileSystemPersist } from '../platform';
 import { DEFAULT_EXPORTER_CONFIG, AzureExporterConfig } from '../config';
-import { BaseExporter, TelemetryProcessor } from '../types';
-import { ArrayPersist } from '../platform/nodejs/persist/arrayPersist';
+import { BaseExporter, TelemetryProcessor, PersistentStorage, Sender } from '../types';
 import { isRetriable, BreezeResponse } from '../utils/breezeUtils';
 import { ENV_CONNECTION_STRING, ENV_INSTRUMENTATION_KEY } from '../Declarations/Constants';
 
 export abstract class AzureMonitorBaseExporter implements BaseExporter {
-  protected readonly _persister: ArrayPersist<Envelope[]>; // @todo: replace with FileSystemPersister
+  protected readonly _persister: PersistentStorage;
 
   protected readonly _logger: Logger;
 
-  protected readonly _sender: HttpSender;
+  protected readonly _sender: Sender;
 
   protected _retryTimer: NodeJS.Timeout | null;
 
@@ -53,7 +52,7 @@ export abstract class AzureMonitorBaseExporter implements BaseExporter {
 
     this._telemetryProcessors = [];
     this._sender = new HttpSender();
-    this._persister = new ArrayPersist<Envelope[]>();
+    this._persister = new FileSystemPersist();
     this._retryTimer = null;
   }
 

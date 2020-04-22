@@ -12,7 +12,12 @@ import {
   MS_LINKS,
   INPROC,
 } from './constants/applicationinsights';
-import { GRPC_ERROR_MESSAGE, GRPC_ERROR_NAME, GRPC_METHOD, GRPC_STATUS_CODE } from './constants/span/grpcAttributes';
+import {
+  GRPC_ERROR_MESSAGE,
+  GRPC_ERROR_NAME,
+  GRPC_METHOD,
+  GRPC_STATUS_CODE,
+} from './constants/span/grpcAttributes';
 
 function createTagsFromSpan(span: ReadableSpan): Tags {
   const tags: Tags = {};

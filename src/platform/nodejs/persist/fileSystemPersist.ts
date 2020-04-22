@@ -4,7 +4,7 @@ import * as path from 'path';
 import { Logger } from '@opentelemetry/api';
 import { NoopLogger } from '@opentelemetry/core';
 import { PersistentStorage } from '../../../types';
-import { ExporterConfig, DEFAULT_EXPORTER_CONFIG } from '../../../config';
+import { AzureExporterConfig, DEFAULT_EXPORTER_CONFIG } from '../../../config';
 import { confirmDirExists, getShallowDirectorySize } from './fileSystemHelpers';
 
 export class FileSystemPersist implements PersistentStorage {
@@ -12,11 +12,11 @@ export class FileSystemPersist implements PersistentStorage {
 
   maxBytesOnDisk: number = 50_000_000; // ~50MB
 
-  private readonly _options: ExporterConfig;
+  private readonly _options: AzureExporterConfig;
 
   private readonly _logger: Logger;
 
-  constructor(options: Partial<ExporterConfig> = DEFAULT_EXPORTER_CONFIG) {
+  constructor(options: Partial<AzureExporterConfig> = {}) {
     this._options = { ...DEFAULT_EXPORTER_CONFIG, ...options };
     this._logger = options.logger || new NoopLogger();
     if (!this._options.instrumentationKey) {
@@ -26,18 +26,20 @@ export class FileSystemPersist implements PersistentStorage {
     }
   }
 
-  push(value: unknown, cb: (err: Error | null, result?: boolean | undefined) => void): void {
-    this._logger.info('Pushing value to persistent storage', value as string);
+  push(value: unknown[], cb: (err: Error | null, result?: boolean | undefined) => void): void {
+    this._logger.info('Pushing value to persistent storage', value.toString());
     this._storeToDisk(JSON.stringify(value), cb);
   }
 
-  shift(cb: (err: Error | null, value?: unknown) => void): void {
+  shift(cb: (err: Error | null, value?: unknown[]) => void): void {
     this._logger.info('Returning first member of filesystem');
     this._getFirstFileOnDisk((error, buffer) => {
       if (error) {
         cb(error);
       } else if (buffer) {
         cb(null, JSON.parse(buffer.toString('utf8')));
+      } else {
+        cb(null);
       }
     });
   }
@@ -57,7 +59,9 @@ export class FileSystemPersist implements PersistentStorage {
         fs.readdir(tempDir, (error, origFiles) => {
           if (!error) {
             const files = origFiles.filter((f) => path.basename(f).includes('.ai.json'));
-            if (files.length > 0) {
+            if (files.length === 0) {
+              callback(null);
+            } else {
               const firstFile = files[0];
               const filePath = path.join(tempDir, firstFile);
               fs.readFile(filePath, (readFileErr, payload) => {
