@@ -10,6 +10,10 @@ import { failedBreezeResponse, partialBreezeResponse, successfulBreezeResponse }
 
 import nock = require('nock');
 
+function toObject(obj: object) {
+  return JSON.parse(JSON.stringify(obj));
+}
+
 describe('#AzureMonitorBaseExporter', () => {
   class TestExporter extends AzureMonitorBaseExporter {
     constructor() {
@@ -41,7 +45,7 @@ describe('#AzureMonitorBaseExporter', () => {
           exporter['_persister'].shift((err, persistedEnvelopes) => {
             assert.strictEqual(err, null);
             assert.strictEqual(persistedEnvelopes?.length, 1);
-            assert.deepStrictEqual(persistedEnvelopes![0], envelope);
+            assert.deepStrictEqual(persistedEnvelopes![0], toObject(envelope));
             done();
           });
         });
