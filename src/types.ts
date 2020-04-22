@@ -2,7 +2,13 @@ import { ExportResult } from '@opentelemetry/base';
 import { Envelope } from './Declarations/Contracts';
 
 export type Tags = { [key: string]: string };
-export type Properties = { [key: string]: string };
+export type PropertyType = string | number | boolean | object | Array<PropertyType>;
+export type Properties = { [key: string]: Properties | PropertyType };
+export interface MSLink {
+  operation_Id: string;
+  id: string;
+}
+export type Measurements = { [key: string]: number };
 export type TelemetryProcessor = (envelope: Envelope) => boolean | void;
 export type SenderCallback = (err: Error | null, statusCode?: number, result?: string) => void;
 
