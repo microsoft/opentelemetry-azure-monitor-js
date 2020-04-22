@@ -2,11 +2,13 @@ import { ExportResult } from '@opentelemetry/base';
 import { Logger } from '@opentelemetry/api';
 import { ConsoleLogger, LogLevel } from '@opentelemetry/core';
 import { Envelope } from '../Declarations/Contracts';
+import { ConnectionStringParser } from '../utils/connectionStringParser';
 import { HttpSender } from '../platform';
 import { DEFAULT_EXPORTER_CONFIG, AzureExporterConfig } from '../config';
 import { BaseExporter, TelemetryProcessor } from '../types';
 import { ArrayPersist } from '../platform/nodejs/persist/arrayPersist';
 import { isRetriable, BreezeResponse } from '../utils/breezeUtils';
+import { ENV_CONNECTION_STRING, ENV_INSTRUMENTATION_KEY } from '../Declarations/Constants';
 
 export abstract class AzureMonitorBaseExporter implements BaseExporter {
   protected readonly _persister: ArrayPersist<Envelope[]>; // @todo: replace with FileSystemPersister
@@ -21,17 +23,32 @@ export abstract class AzureMonitorBaseExporter implements BaseExporter {
 
   private readonly _options: AzureExporterConfig;
 
-  constructor(_options: Partial<AzureExporterConfig> = DEFAULT_EXPORTER_CONFIG) {
+  constructor(_options: Partial<AzureExporterConfig> = {}) {
+    const connectionString = _options.connectionString || process.env[ENV_CONNECTION_STRING];
+    const instrumentationKey = _options.instrumentationKey || process.env[ENV_INSTRUMENTATION_KEY];
+
     this._logger = _options.logger || new ConsoleLogger(LogLevel.ERROR);
     this._options = {
       ...DEFAULT_EXPORTER_CONFIG,
       ..._options,
     };
 
+    if (connectionString) {
+      const parsedConnectionString = ConnectionStringParser.parse(connectionString);
+      this._options = {
+        ...DEFAULT_EXPORTER_CONFIG,
+        // Overwrite options with connection string results, if any
+        instrumentationKey: parsedConnectionString.instrumentationkey || instrumentationKey,
+        endpointUrl: parsedConnectionString.ingestionendpoint || _options.endpointUrl!,
+      };
+    }
+
     // Instrumentation key is required
-    // @todo: parse connection strings
-    if (!_options.instrumentationKey) {
-      this._logger.error('No instrumentation key was provided to the Azure Monitor Exporter');
+    if (!this._options.instrumentationKey) {
+      const message =
+        'No instrumentation key or connection string was provided to the Azure Monitor Exporter';
+      this._logger.error(message);
+      throw new Error(message);
     }
 
     this._telemetryProcessors = [];
