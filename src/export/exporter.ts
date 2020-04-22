@@ -1,40 +1,50 @@
 import { ExportResult } from '@opentelemetry/base';
 import { Logger } from '@opentelemetry/api';
-import { NoopLogger } from '@opentelemetry/core';
-import { Envelope, ENV_CONNECTION_STRING, ENV_INSTRUMENTATION_KEY } from '../Declarations/Contracts';
-import { NoopSender } from '../platform';
-import { ExporterConfig, DEFAULT_EXPORTER_CONFIG } from '../config';
-import { BaseExporter, TelemetryProcessor } from '../types';
-import { ArrayPersist } from '../platform/nodejs/arrayPersist';
-import { isRetriable } from '../utils/breezeUtils';
+import { ConsoleLogger, LogLevel } from '@opentelemetry/core';
+import { Envelope } from '../Declarations/Contracts';
 import { ConnectionStringParser } from '../utils/connectionStringParser';
+import { HttpSender } from '../platform';
+import { DEFAULT_EXPORTER_CONFIG, AzureExporterConfig } from '../config';
+import { BaseExporter, TelemetryProcessor } from '../types';
+import { ArrayPersist } from '../platform/nodejs/persist/arrayPersist';
+import { isRetriable, BreezeResponse } from '../utils/breezeUtils';
+import { ENV_CONNECTION_STRING, ENV_INSTRUMENTATION_KEY } from '../Declarations/Constants';
 
 export abstract class AzureMonitorBaseExporter implements BaseExporter {
-  private readonly _persister: ArrayPersist<Envelope[]>; // @todo: replace with FileSystemPersister
+  protected readonly _persister: ArrayPersist<Envelope[]>; // @todo: replace with FileSystemPersister
 
   protected readonly _logger: Logger;
 
-  private readonly _sender: NoopSender;
+  protected readonly _sender: HttpSender;
+
+  protected _retryTimer: NodeJS.Timeout | null;
 
   protected _telemetryProcessors: TelemetryProcessor[];
 
-  constructor(public options: Partial<ExporterConfig> = DEFAULT_EXPORTER_CONFIG) {
-    const connectionString = options.connectionString || process.env[ENV_CONNECTION_STRING];
-    const instrumentationKey = options.instrumentationKey || process.env[ENV_INSTRUMENTATION_KEY];
-    this._logger = options.logger || new NoopLogger();
+  private readonly _options: AzureExporterConfig;
+
+  constructor(_options: Partial<AzureExporterConfig> = {}) {
+    const connectionString = _options.connectionString || process.env[ENV_CONNECTION_STRING];
+    const instrumentationKey = _options.instrumentationKey || process.env[ENV_INSTRUMENTATION_KEY];
+
+    this._logger = _options.logger || new ConsoleLogger(LogLevel.ERROR);
+    this._options = {
+      ...DEFAULT_EXPORTER_CONFIG,
+      ..._options,
+    };
 
     if (connectionString) {
       const parsedConnectionString = ConnectionStringParser.parse(connectionString);
-      this.options = {
-        ...options,
+      this._options = {
+        ...DEFAULT_EXPORTER_CONFIG,
         // Overwrite options with connection string results, if any
         instrumentationKey: parsedConnectionString.instrumentationkey || instrumentationKey,
-        endpointUrl: parsedConnectionString.ingestionendpoint || options.endpointUrl,
+        endpointUrl: parsedConnectionString.ingestionendpoint || _options.endpointUrl!,
       };
     }
 
     // Instrumentation key is required
-    if (!this.options.instrumentationKey) {
+    if (!this._options.instrumentationKey) {
       const message =
         'No instrumentation key or connection string was provided to the Azure Monitor Exporter';
       this._logger.error(message);
@@ -42,13 +52,14 @@ export abstract class AzureMonitorBaseExporter implements BaseExporter {
     }
 
     this._telemetryProcessors = [];
-    this._sender = new NoopSender();
+    this._sender = new HttpSender();
     this._persister = new ArrayPersist<Envelope[]>();
+    this._retryTimer = null;
   }
 
   exportEnvelopes(payload: Envelope[], resultCallback: (result: ExportResult) => void): void {
     const envelopes = this._applyTelemetryProcessors(payload);
-    this._sender.send(envelopes, (err, exportResult, statusCode, resultString) => {
+    this._sender.send(envelopes, (err, statusCode, resultString) => {
       const persistCb = (persistErr: Error | null, persistSuccess?: boolean) => {
         if (persistErr || !persistSuccess) {
           return resultCallback(ExportResult.FAILED_NOT_RETRYABLE);
@@ -57,16 +68,38 @@ export abstract class AzureMonitorBaseExporter implements BaseExporter {
       };
 
       if (err) {
+        // Request failed -- always retry
         this._logger.error(err.message);
         this._persister.push(envelopes, persistCb);
-      } else if (isRetriable(statusCode)) {
+      } else if (statusCode === 200) {
+        // Success -- @todo: start retry timer
+        if (!this._retryTimer) {
+          this._retryTimer = setTimeout(() => {
+            this._retryTimer = null;
+            this._sendFirstPersistedFile();
+          }, this._options.batchSendRetryIntervalMs);
+          this._retryTimer.unref();
+        }
+        resultCallback(ExportResult.SUCCESS);
+      } else if (statusCode && isRetriable(statusCode)) {
+        // Failed -- persist failed data
         if (resultString) {
           this._logger.info(resultString);
+          const breezeResponse: BreezeResponse = JSON.parse(resultString);
+          const filteredEnvelopes = breezeResponse.errors.reduce(
+            (acc, v) => [...acc, envelopes[v.index]],
+            [] as Envelope[],
+          );
+          // calls resultCallback(ExportResult) based on result of persister.push
+          this._persister.push(filteredEnvelopes, persistCb);
+        } else {
+          // calls resultCallback(ExportResult) based on result of persister.push
+          this._persister.push(envelopes, persistCb);
         }
-        // @todo: filter retriable envelopes on partial success (206)
-        this._persister.push(envelopes, persistCb);
+      } else {
+        // Failed -- not retriable
+        resultCallback(ExportResult.FAILED_NOT_RETRYABLE);
       }
-      return resultCallback(exportResult);
     });
   }
 
@@ -100,5 +133,17 @@ export abstract class AzureMonitorBaseExporter implements BaseExporter {
     });
 
     return filteredEnvelopes;
+  }
+
+  private _sendFirstPersistedFile() {
+    this._persister.shift((err, envelopes) => {
+      if (err) {
+        this._logger.warn(`Failed to fetch persisted file`, err);
+      } else if (envelopes) {
+        this._sender.send(envelopes, () => {
+          /** no-op */
+        });
+      }
+    });
   }
 }

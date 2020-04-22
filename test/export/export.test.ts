@@ -1,15 +1,20 @@
 /* eslint-disable no-param-reassign */
 /* eslint-disable dot-notation */
 import * as assert from 'assert';
+import { ExportResult } from '@opentelemetry/base';
 import { AzureMonitorBaseExporter } from '../../src/export/exporter';
 import { TelemetryProcessor } from '../../src/types';
 import { Envelope } from '../../src/Declarations/Contracts';
+import { DEFAULT_BREEZE_ENDPOINT } from '../../src/Declarations/Constants';
+import { failedBreezeResponse, partialBreezeResponse, successfulBreezeResponse } from '../breezeTestUtils';
+
+import nock = require('nock');
 
 describe('#AzureMonitorBaseExporter', () => {
   class TestExporter extends AzureMonitorBaseExporter {
     constructor() {
       super({
-        instrumentationKey: 'ikey',
+        instrumentationKey: 'foo',
       });
     }
 
@@ -17,6 +22,85 @@ describe('#AzureMonitorBaseExporter', () => {
       return this._telemetryProcessors;
     }
   }
+
+  describe('Sender/Persister Controller', () => {
+    describe('#exportEnvelopes()', () => {
+      const scope = nock(DEFAULT_BREEZE_ENDPOINT).post('/v2/track');
+      const envelope = new Envelope();
+
+      after(() => {
+        nock.cleanAll();
+      });
+
+      it('should persist retriable failed telemetry', (done) => {
+        const exporter = new TestExporter();
+        const response = failedBreezeResponse(1, 408);
+        scope.reply(408, JSON.stringify(response));
+        exporter.exportEnvelopes([envelope], (result) => {
+          assert.strictEqual(result, ExportResult.FAILED_RETRYABLE);
+          exporter['_persister'].shift((err, persistedEnvelopes) => {
+            assert.strictEqual(err, null);
+            assert.strictEqual(persistedEnvelopes?.length, 1);
+            assert.deepStrictEqual(persistedEnvelopes![0], envelope);
+            done();
+          });
+        });
+      });
+
+      it('should persist partial retriable failed telemetry', (done) => {
+        const exporter = new TestExporter();
+        const response = partialBreezeResponse([200, 408, 408]);
+        scope.reply(206, JSON.stringify(response));
+        exporter.exportEnvelopes([envelope, envelope, envelope], (result) => {
+          assert.strictEqual(result, ExportResult.FAILED_RETRYABLE);
+          exporter['_persister'].shift((err, persistedEnvelopes) => {
+            assert.strictEqual(err, null);
+            assert.strictEqual(persistedEnvelopes?.length, 2);
+            done();
+          });
+        });
+      });
+
+      it('should not persist non-retriable failed telemetry', (done) => {
+        const exporter = new TestExporter();
+        const response = failedBreezeResponse(1, 400);
+        scope.reply(400, JSON.stringify(response));
+        exporter.exportEnvelopes([envelope], (result) => {
+          assert.strictEqual(result, ExportResult.FAILED_NOT_RETRYABLE);
+          exporter['_persister'].shift((err, persistedEnvelopes) => {
+            assert.strictEqual(err, null);
+            assert.strictEqual(persistedEnvelopes, undefined);
+            done();
+          });
+        });
+      });
+
+      it('should start retry timer when telemetry is successfully sent', (done) => {
+        const exporter = new TestExporter();
+        const response = successfulBreezeResponse(1);
+        scope.reply(200, JSON.stringify(response));
+        exporter.exportEnvelopes([envelope], (result) => {
+          assert.strictEqual(result, ExportResult.SUCCESS);
+          assert.notEqual(exporter['_retryTimer'], null);
+          clearTimeout(exporter['_retryTimer']!);
+          exporter['_retryTimer'] = null;
+          done();
+        });
+      });
+
+      it('should not start a retry timer when one already exists', (done) => {
+        const exporter = new TestExporter();
+        exporter['_retryTimer'] = 'foo' as any;
+        const response = successfulBreezeResponse(1);
+        scope.reply(200, JSON.stringify(response));
+        exporter.exportEnvelopes([envelope], (result) => {
+          assert.strictEqual(result, ExportResult.SUCCESS);
+          assert.strictEqual(exporter['_retryTimer'], 'foo');
+          done();
+        });
+      });
+    });
+  });
 
   describe('Telemetry Processors', () => {
     const nameProcessor: TelemetryProcessor = (envelope: Envelope) => {
@@ -56,6 +140,7 @@ describe('#AzureMonitorBaseExporter', () => {
         assert.strictEqual(exporter.getTelemetryProcesors().length, 0);
       });
     });
+
     describe('#_applyTelemetryProcessors()', () => {
       it('should filter envelopes', () => {
         const fooEnvelope = new Envelope();

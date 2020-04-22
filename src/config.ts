@@ -1,21 +1,23 @@
 import { Logger } from '@opentelemetry/api';
 import { DEFAULT_BREEZE_ENDPOINT } from './Declarations/Constants';
 
-export interface ExporterConfig {
-  // Exporter
+export interface AzureExporterConfig {
+  // Setup String
   instrumentationKey?: string;
   connectionString?: string;
-  endpointUrl: string;
+
+  // Exporter
   logger?: Logger;
 
-  // Controller
+  // Channel
   batchSendRetryIntervalMs: number;
 
   // Sender
   maxConsecutiveFailuresBeforeWarning: number;
+  endpointUrl: string;
 }
 
-export const DEFAULT_EXPORTER_CONFIG: ExporterConfig = {
+export const DEFAULT_EXPORTER_CONFIG: AzureExporterConfig = {
   endpointUrl: DEFAULT_BREEZE_ENDPOINT,
   batchSendRetryIntervalMs: 60_000,
   maxConsecutiveFailuresBeforeWarning: 10,
