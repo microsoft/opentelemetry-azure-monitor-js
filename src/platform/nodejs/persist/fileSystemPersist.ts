@@ -118,13 +118,12 @@ export class FileSystemPersist implements PersistentStorage {
           return;
         }
 
-        // create file - file name for now is the timestamp, a better approach would be a UUID but that
+        // create file - file name for now is the timestamp, @todo: a better approach would be a UUID but that
         // would require an external dependency
         const fileName = `${new Date().getTime()}${FileSystemPersist.FILENAME_SUFFIX}`;
         const fileFullPath = path.join(directory, fileName);
 
-        // Mode 600 is w/r for creator and no read access for others (only applies on *nix)
-        // For Windows, ACL rules are applied to the entire directory (see logic in _confirmDirExists and _applyACLRules)
+        // Mode 600 is w/r for creator and no read access for others
         this._logger.info(`saving data to disk at: ${fileFullPath}`);
         fs.writeFile(fileFullPath, payload, { mode: 0o600 }, (writeError) => {
           this._logger.warn(`Error writing file to persistent file storage`, writeError);
