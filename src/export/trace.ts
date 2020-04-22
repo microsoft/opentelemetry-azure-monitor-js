@@ -5,13 +5,18 @@ import { DEFAULT_EXPORTER_CONFIG, AzureExporterConfig } from '../config';
 import { AzureMonitorBaseExporter } from './exporter';
 
 export class AzureMonitorTraceExporter extends AzureMonitorBaseExporter implements SpanExporter {
-  constructor(options: Partial<AzureExporterConfig> = DEFAULT_EXPORTER_CONFIG) {
-    super(options);
+  constructor(options: Partial<AzureExporterConfig> = {}) {
+    super({
+      ...DEFAULT_EXPORTER_CONFIG,
+      ...options,
+    });
   }
 
   export(spans: ReadableSpan[], resultCallback: (result: ExportResult) => void): void {
     this._logger.info('Exporting spans', spans);
-    const envelopes = spans.map((span) => readableSpanToEnvelope(span, '', this._logger));
+    const envelopes = spans.map((span) =>
+      readableSpanToEnvelope(span, this._options.instrumentationKey!, this._logger),
+    );
     this.exportEnvelopes(envelopes, resultCallback);
   }
 

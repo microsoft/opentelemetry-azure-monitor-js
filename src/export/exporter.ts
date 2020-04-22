@@ -20,7 +20,7 @@ export abstract class AzureMonitorBaseExporter implements BaseExporter {
 
   protected _telemetryProcessors: TelemetryProcessor[];
 
-  private readonly _options: AzureExporterConfig;
+  protected readonly _options: AzureExporterConfig;
 
   constructor(_options: Partial<AzureExporterConfig> = {}) {
     const connectionString = _options.connectionString || process.env[ENV_CONNECTION_STRING];
