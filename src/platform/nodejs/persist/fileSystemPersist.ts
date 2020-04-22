@@ -10,6 +10,8 @@ import { confirmDirExists, getShallowDirectorySize } from './fileSystemHelpers';
 export class FileSystemPersist implements PersistentStorage {
   static TEMPDIR_PREFIX = 'ot-azure-exporter-';
 
+  static FILENAME_SUFFIX = '.ai.json';
+
   maxBytesOnDisk: number = 50_000_000; // ~50MB
 
   private readonly _options: AzureExporterConfig;
@@ -58,7 +60,9 @@ export class FileSystemPersist implements PersistentStorage {
       if (stats.isDirectory()) {
         fs.readdir(tempDir, (error, origFiles) => {
           if (!error) {
-            const files = origFiles.filter((f) => path.basename(f).includes('.ai.json'));
+            const files = origFiles.filter((f) =>
+              path.basename(f).includes(FileSystemPersist.FILENAME_SUFFIX),
+            );
             if (files.length === 0) {
               callback(null);
             } else {
@@ -116,7 +120,7 @@ export class FileSystemPersist implements PersistentStorage {
 
         // create file - file name for now is the timestamp, a better approach would be a UUID but that
         // would require an external dependency
-        const fileName = `${new Date().getTime()}.ai.json`;
+        const fileName = `${new Date().getTime()}${FileSystemPersist.FILENAME_SUFFIX}`;
         const fileFullPath = path.join(directory, fileName);
 
         // Mode 600 is w/r for creator and no read access for others (only applies on *nix)
