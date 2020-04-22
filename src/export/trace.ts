@@ -1,11 +1,11 @@
 import { ExportResult } from '@opentelemetry/base';
 import { ReadableSpan, SpanExporter } from '@opentelemetry/tracing';
-import { ExporterConfig, DEFAULT_EXPORTER_CONFIG } from '../config';
 import { readableSpanToEnvelope } from '../utils/spanUtils';
+import { DEFAULT_EXPORTER_CONFIG, AzureExporterConfig } from '../config';
 import { AzureMonitorBaseExporter } from './exporter';
 
 export class AzureMonitorTraceExporter extends AzureMonitorBaseExporter implements SpanExporter {
-  constructor(options: ExporterConfig = DEFAULT_EXPORTER_CONFIG) {
+  constructor(options: Partial<AzureExporterConfig> = DEFAULT_EXPORTER_CONFIG) {
     super(options);
   }
 

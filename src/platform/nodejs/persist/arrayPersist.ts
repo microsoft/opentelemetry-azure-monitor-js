@@ -1,4 +1,4 @@
-import { PersistentStorage } from '../../types';
+import { PersistentStorage } from '../../../types';
 
 export class ArrayPersist<T> implements PersistentStorage {
   private _buffer: T[] = [];
