@@ -6,6 +6,7 @@
     "bootstrap": "lerna bootstrap --no-ci",
     "build": "lerna run build",
     "lint": "lerna run lint",
+    "report": "lerna run report",
     "test": "lerna run test"
   },
   "devDependencies": {
