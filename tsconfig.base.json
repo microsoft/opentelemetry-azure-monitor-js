@@ -17,9 +17,5 @@
     "incremental": true,
     "outDir": "build",
     "lib": []
-  },
-  "include": [
-    "src/**/*.ts",
-    "test/**/*.ts"
-  ]
+  }
 }
