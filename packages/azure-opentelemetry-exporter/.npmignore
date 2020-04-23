@@ -1,0 +1,10 @@
+# Ignore everything
+*
+
+# Except for...
+!build
+!src
+!package.json
+!README.md
+!SECURITY.md
+!LICENSE
