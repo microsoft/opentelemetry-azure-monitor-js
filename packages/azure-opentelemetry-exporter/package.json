@@ -9,7 +9,8 @@
     "lint": "eslint . --ext .ts",
     "test": "c8 ts-mocha -p ./tsconfig.json 'test/**/*.test.ts'",
     "report": "c8 report --reporter=json",
-    "prepare": "npm run build"
+    "prepare": "npm run build",
+    "publish": "npm publish"
   },
   "engines": {
     "node": ">=8.3.0"

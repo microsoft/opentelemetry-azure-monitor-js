@@ -9,7 +9,8 @@
     "build": "lerna run build",
     "lint": "lerna run lint",
     "report": "lerna run report",
-    "test": "lerna run test"
+    "test": "lerna run test",
+    "publish": "lerna run publish"
   },
   "devDependencies": {
     "@opentelemetry/api": "^0.7.0",
