@@ -7,7 +7,7 @@
     "clean": "rimraf build",
     "build": "tsc -p ./tsconfig.json",
     "lint": "eslint . --ext .ts",
-    "test": "ts-mocha -p ./tsconfig.json 'test/**/*.test.ts'",
+    "test": "c8 ts-mocha -p ./tsconfig.json 'test/**/*.test.ts'",
     "report": "c8 report --reporter=json",
     "prepare": "npm run build"
   },
