@@ -1,6 +1,6 @@
 {
   "name": "@azure/opentelemetry-exporter",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "Application Insights exporter for the OpenTelemetry JavaScript (Node.js) SDK",
   "main": "build/src/index.js",
   "private": true,
@@ -9,7 +9,8 @@
     "build": "tsc -p ./tsconfig.json",
     "lint": "eslint . --ext .ts",
     "test": "ts-mocha -p ./tsconfig.json 'test/**/*.test.ts'",
-    "report": "c8 report --reporter=json"
+    "report": "c8 report --reporter=json",
+    "prepare": "npm run build"
   },
   "engines": {
     "node": ">=8.3.0"
