@@ -18,9 +18,13 @@ import {
   GRPC_METHOD,
   GRPC_STATUS_CODE,
 } from './constants/span/grpcAttributes';
+import { msToTimeSpan } from './breezeUtils';
+import { getInstance } from '../platform';
+import { DB_STATEMENT, DB_TYPE, DB_INSTANCE } from './constants/span/dbAttributes';
 
 function createTagsFromSpan(span: ReadableSpan): Tags {
-  const tags: Tags = {};
+  const context = getInstance();
+  const tags: Tags = { ...context.tags };
   tags[AI_OPERATION_ID] = span.spanContext.traceId;
   if (span.parentSpanId) {
     tags[AI_OPERATION_PARENT_ID] = span.parentSpanId;
@@ -46,7 +50,7 @@ function createPropertiesFromSpan(span: ReadableSpan): Properties {
     if (
       key === GRPC_ERROR_MESSAGE ||
       key === GRPC_ERROR_NAME ||
-      !(key.startsWith('http.') || key.startsWith('grpc.'))
+      !(key.startsWith('http.') || key.startsWith('grpc.') || key.startsWith('db.'))
     ) {
       properties[key] = span.attributes[key] as string;
     }
@@ -67,9 +71,9 @@ function createDependencyData(span: ReadableSpan): RemoteDependencyData {
   data.id = `|${span.spanContext.traceId}.${span.spanContext.spanId}.`;
   data.success = span.status.code === CanonicalCode.OK;
   data.resultCode = String(span.status.code);
-  data.target = span.attributes[HTTP_URL] as string;
+  data.target = span.attributes[HTTP_URL] as string | undefined;
   data.type = 'Dependency';
-  data.duration = String(hrTimeToMilliseconds(span.duration));
+  data.duration = msToTimeSpan(hrTimeToMilliseconds(span.duration));
   data.ver = 1;
 
   if (span.attributes[HTTP_STATUS_CODE]) {
@@ -97,6 +101,20 @@ function createDependencyData(span: ReadableSpan): RemoteDependencyData {
     }
   }
 
+  if (span.attributes[DB_STATEMENT]) {
+    data.name = String(span.attributes[DB_STATEMENT]);
+    data.data = String(span.attributes[DB_STATEMENT]);
+    if (span.attributes[DB_TYPE]) {
+      data.type = String(span.attributes[DB_TYPE]);
+    } else {
+      data.type = 'DB';
+    }
+
+    if (span.attributes[DB_INSTANCE]) {
+      data.target = String(span.attributes[DB_INSTANCE]);
+    }
+  }
+
   return data;
 }
 
@@ -106,7 +124,7 @@ function createRequestData(span: ReadableSpan): RequestData {
   data.id = `|${span.spanContext.traceId}.${span.spanContext.spanId}.`;
   data.success = span.status.code === CanonicalCode.OK;
   data.responseCode = String(span.status.code);
-  data.duration = String(hrTimeToMilliseconds(span.duration));
+  data.duration = msToTimeSpan(hrTimeToMilliseconds(span.duration));
   data.ver = 1;
   data.source = undefined;
 
@@ -184,7 +202,7 @@ export function readableSpanToEnvelope(
 
   envelope.data.baseData = { ...data, properties };
   envelope.tags = tags;
-  envelope.time = new Date().toISOString();
+  envelope.time = new Date(Date.now() - hrTimeToMilliseconds(span.duration)).toISOString();
   envelope.iKey = instrumentationKey;
   envelope.ver = 1;
   return envelope;

@@ -3,12 +3,16 @@ import { SpanKind, CanonicalCode } from '@opentelemetry/api';
 import * as assert from 'assert';
 import { NoopLogger, hrTimeToMilliseconds } from '@opentelemetry/core';
 
-import { readableSpanToEnvelope } from '../../src/utils/spanUtils';
 import { Tags, Properties } from '../../src/types';
 import { RequestData, RemoteDependencyData, Envelope } from '../../src/Declarations/Contracts';
 import * as http from '../../src/utils/constants/span/httpAttributes';
 import * as grpc from '../../src/utils/constants/span/grpcAttributes';
 import * as ai from '../../src/utils/constants/applicationinsights';
+import { Context, getInstance } from '../../src/platform';
+import { msToTimeSpan } from '../../src/utils/breezeUtils';
+import { readableSpanToEnvelope } from '../../src/utils/spanUtils';
+
+const context = getInstance(undefined, './', '../../');
 
 const tracer = new BasicTracerProvider({
   logger: new NoopLogger(),
@@ -22,6 +26,10 @@ function assertEnvelope(
   expectedProperties: Properties,
   expectedBaseData: Partial<RequestData | RemoteDependencyData>,
 ) {
+  assert.strictEqual(Context.sdkVersion, '0.0.1');
+  assert.strictEqual(Object.keys(Context.appVersion).length, 1);
+  assert.notDeepStrictEqual(Context.appVersion, 'unknown');
+
   assert.ok(envelope);
   assert.strictEqual(envelope.name, name);
   assert.deepStrictEqual(envelope.data?.baseType, baseType);
@@ -31,7 +39,7 @@ function assertEnvelope(
   assert.ok(envelope.ver);
   assert.ok(envelope.data);
 
-  assert.deepStrictEqual(envelope.tags, expectedTags);
+  assert.deepStrictEqual(envelope.tags, { ...context.tags, ...expectedTags });
   assert.deepStrictEqual(envelope.data?.baseData?.properties, expectedProperties);
   assert.deepStrictEqual(envelope.data?.baseData, expectedBaseData);
 }
@@ -74,7 +82,7 @@ describe('spanUtils.ts', () => {
 
         const expectedBaseData: Partial<RequestData> = {
           source: undefined,
-          duration: String(hrTimeToMilliseconds(readableSpan.duration)),
+          duration: msToTimeSpan(hrTimeToMilliseconds(readableSpan.duration)),
           id: `|${span.spanContext.traceId}.${span.spanContext.spanId}.`,
           success: true,
           responseCode: '0',
@@ -128,7 +136,7 @@ describe('spanUtils.ts', () => {
         };
 
         const expectedBaseData: Partial<RemoteDependencyData> = {
-          duration: String(hrTimeToMilliseconds(readableSpan.duration)),
+          duration: msToTimeSpan(hrTimeToMilliseconds(readableSpan.duration)),
           id: `|${span.spanContext.traceId}.${span.spanContext.spanId}.`,
           success: true,
           resultCode: '0',
@@ -179,7 +187,7 @@ describe('spanUtils.ts', () => {
         };
 
         const expectedBaseData: Partial<RequestData> = {
-          duration: String(hrTimeToMilliseconds(readableSpan.duration)),
+          duration: msToTimeSpan(hrTimeToMilliseconds(readableSpan.duration)),
           id: `|${span.spanContext.traceId}.${span.spanContext.spanId}.`,
           success: true,
           responseCode: '0',
@@ -227,7 +235,7 @@ describe('spanUtils.ts', () => {
         };
 
         const expectedBaseData: Partial<RemoteDependencyData> = {
-          duration: String(hrTimeToMilliseconds(readableSpan.duration)),
+          duration: msToTimeSpan(hrTimeToMilliseconds(readableSpan.duration)),
           id: `|${span.spanContext.traceId}.${span.spanContext.spanId}.`,
           success: true,
           resultCode: '0',
@@ -285,7 +293,7 @@ describe('spanUtils.ts', () => {
         };
 
         const expectedBaseData: RequestData = {
-          duration: String(hrTimeToMilliseconds(readableSpan.duration)),
+          duration: msToTimeSpan(hrTimeToMilliseconds(readableSpan.duration)),
           id: `|${span.spanContext.traceId}.${span.spanContext.spanId}.`,
           success: true,
           responseCode: '200',
@@ -336,7 +344,7 @@ describe('spanUtils.ts', () => {
         };
 
         const expectedBaseData: RemoteDependencyData = {
-          duration: String(hrTimeToMilliseconds(readableSpan.duration)),
+          duration: msToTimeSpan(hrTimeToMilliseconds(readableSpan.duration)),
           id: `|traceid.spanId.`,
           success: true,
           resultCode: '200',

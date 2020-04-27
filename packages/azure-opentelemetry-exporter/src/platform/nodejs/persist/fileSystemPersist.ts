@@ -29,16 +29,17 @@ export class FileSystemPersist implements PersistentStorage {
   }
 
   push(value: unknown[], cb: (err: Error | null, result?: boolean | undefined) => void): void {
-    this._logger.info('Pushing value to persistent storage', value.toString());
+    this._logger.debug('Pushing value to persistent storage', value.toString());
     this._storeToDisk(JSON.stringify(value), cb);
   }
 
   shift(cb: (err: Error | null, value?: unknown[]) => void): void {
-    this._logger.info('Returning first member of filesystem');
+    this._logger.debug('Searching for filesystem persisted files');
     this._getFirstFileOnDisk((error, buffer) => {
       if (error) {
         cb(error);
       } else if (buffer) {
+        this._logger.info('Found a filesystem persisted file');
         cb(null, JSON.parse(buffer.toString('utf8')));
       } else {
         cb(null);
