@@ -1,6 +1,6 @@
 {
   "name": "@azure/opentelemetry-exporter",
-  "version": "0.0.1",
+  "version": "1.0.0-preview.1",
   "description": "Application Insights exporter for the OpenTelemetry JavaScript (Node.js) SDK",
   "main": "build/src/index.js",
   "scripts": {
@@ -17,6 +17,9 @@
   },
   "author": "appinsightssdk@microsoft.com",
   "license": "MIT",
+  "repository": {
+    "url": "https://github.com/microsoft/opentelemetry-azure-monitor-js"
+  },
   "dependencies": {
     "@opentelemetry/base": "^0.7.0",
     "@opentelemetry/core": "^0.7.0",
