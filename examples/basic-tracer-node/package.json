@@ -8,7 +8,7 @@
     "build": "echo 'nothing to build'",
     "test": "echo 'nothing to test'",
     "lint": "echo 'nothing to lint'",
-    "start": "cross-env APPINSIGHTS_INSTRUMENTATIONKEY=25498541-2456-471a-bd73-c915ad18e7ef node --inspect ./index.js"
+    "start": "cross-env APPINSIGHTS_INSTRUMENTATIONKEY=ikey node --inspect ./index.js"
   },
   "repository": {
     "type": "git",

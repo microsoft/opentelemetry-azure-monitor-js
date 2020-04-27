@@ -9,8 +9,8 @@
     "build": "echo 'nothing to build'",
     "test": "echo 'nothing to test'",
     "lint": "echo 'nothing to lint'",
-    "server": "cross-env APPINSIGHTS_INSTRUMENTATIONKEY=25498541-2456-471a-bd73-c915ad18e7ef node ./server.js",
-    "client": "cross-env APPINSIGHTS_INSTRUMENTATIONKEY=25498541-2456-471a-bd73-c915ad18e7ef node ./client.js"
+    "server": "cross-env APPINSIGHTS_INSTRUMENTATIONKEY=ikey node ./server.js",
+    "client": "cross-env APPINSIGHTS_INSTRUMENTATIONKEY=ikey node ./client.js"
   },
   "repository": {
     "type": "git",
