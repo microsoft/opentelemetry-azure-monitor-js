@@ -30,6 +30,7 @@ export abstract class AzureMonitorBaseExporter implements BaseExporter {
     this._options = {
       ...DEFAULT_EXPORTER_CONFIG,
       ..._options,
+      instrumentationKey,
     };
 
     if (connectionString) {
@@ -54,10 +55,12 @@ export abstract class AzureMonitorBaseExporter implements BaseExporter {
     this._sender = new HttpSender();
     this._persister = new FileSystemPersist();
     this._retryTimer = null;
+    this._logger.debug('AzureMonitorTraceExporter was successfully setup');
   }
 
   exportEnvelopes(payload: Envelope[], resultCallback: (result: ExportResult) => void): void {
     const envelopes = this._applyTelemetryProcessors(payload);
+    this._logger.info(`Exporting ${envelopes.length} envelope(s)`);
     this._sender.send(envelopes, (err, statusCode, resultString) => {
       const persistCb = (persistErr: Error | null, persistSuccess?: boolean) => {
         if (persistErr || !persistSuccess) {

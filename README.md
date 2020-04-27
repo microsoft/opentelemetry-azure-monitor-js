@@ -4,6 +4,15 @@
 [![codecov](https://codecov.io/gh/microsoft/opentelemetry-azure-monitor-js/branch/master/graph/badge.svg)](https://codecov.io/gh/microsoft/opentelemetry-azure-monitor-js)
 ![Node.js CI](https://github.com/microsoft/opentelemetry-azure-monitor-js/workflows/Node.js%20CI/badge.svg)
 
+## Compiling This Project
+
+```zsh
+npm install
+npm run build
+npm run lint
+npm run test
+```
+
 ## Contributing
 
 This project welcomes contributions and suggestions.  Most contributions require you to agree to a

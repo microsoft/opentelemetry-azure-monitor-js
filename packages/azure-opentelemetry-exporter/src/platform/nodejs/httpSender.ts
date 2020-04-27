@@ -38,7 +38,7 @@ export class HttpSender implements Sender {
         options.headers['Content-Length'] = String(buffer.length);
       }
 
-      this._logger.info(`HTTPS Options:`, options);
+      this._logger.debug(`HTTPS Options:`, options);
 
       const requestCallback = (res: http.IncomingMessage) => {
         res.setEncoding('utf-8');
