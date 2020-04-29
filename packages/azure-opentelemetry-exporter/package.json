@@ -1,5 +1,5 @@
 {
-  "name": "@azure/opentelemetry-exporter",
+  "name": "@azure/monitor-opentelemetry-exporter",
   "version": "1.0.0-preview.1",
   "description": "Application Insights exporter for the OpenTelemetry JavaScript (Node.js) SDK",
   "main": "build/src/index.js",
