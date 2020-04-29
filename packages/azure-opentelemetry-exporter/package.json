@@ -41,5 +41,5 @@
     "applicationinsights",
     "opentelemetry",
     "exporter"
-  ],
+  ]
 }
