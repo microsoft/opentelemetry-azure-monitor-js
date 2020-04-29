@@ -10,7 +10,7 @@
 This exporter package assumes your application is [already instrumented](https://github.com/open-telemetry/opentelemetry-js/blob/master/getting-started/README.md) with the OpenTelemetry SDK. Once you are ready to export OpenTelemetry data, you can add this exporter to your application:
 
 ```zsh
-npm i --save @azure/opentelemetry-exporter
+npm i --save @azure/monitor-opentelemetry-exporter
 ```
 
 ### Distributed Tracing
@@ -18,7 +18,7 @@ npm i --save @azure/opentelemetry-exporter
 Add the exporter to your existing OpenTelemetry tracer provider (`NodeTracerProvider` / `BasicTracerProvider`)
 
 ```js
-const { AzureMonitorTraceExporter } = require('@azure/opentelemetry-exporter');
+const { AzureMonitorTraceExporter } = require('@azure/monitor-opentelemetry-exporter');
 const { NodeTracerProvider } = require('@opentelemetry/node');
 const { BatchSpanProcessor } = require('@opentelemetry/tracing');
 

@@ -2,7 +2,7 @@
 
 const opentelemetry = require('@opentelemetry/api');
 const { BasicTracerProvider, SimpleSpanProcessor } = require('@opentelemetry/tracing');
-const { AzureMonitorTraceExporter } = require('@azure/opentelemetry-exporter');
+const { AzureMonitorTraceExporter } = require('@azure/monitor-opentelemetry-exporter');
 
 const provider = new BasicTracerProvider();
 
