@@ -2,7 +2,7 @@
 *
 
 # Except for...
-!build
+!build/src/**
 !src
 !package.json
 !README.md

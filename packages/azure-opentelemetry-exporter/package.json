@@ -20,6 +20,9 @@
   "repository": {
     "url": "https://github.com/microsoft/opentelemetry-azure-monitor-js"
   },
+  "devDependencies": {
+    "typescript": "^3.8.3"
+  },
   "dependencies": {
     "@opentelemetry/base": "^0.7.0",
     "@opentelemetry/core": "^0.7.0",

@@ -1,7 +1,7 @@
 
 # Azure Monitor JavaScript Exporter for OpenTelemetry
 
-[![npm version](https://badge.fury.io/js/%40azure%2Fopentelemetry-exporter.svg)](https://badge.fury.io/js/%40azure%2Fopentelemetry-exporter)
+[![npm version](https://badge.fury.io/js/%40azure%2Fmonitor-opentelemetry-exporter.svg)](https://badge.fury.io/js/%40azure%2Fmonitor-opentelemetry-exporter)
 [![codecov](https://codecov.io/gh/microsoft/opentelemetry-azure-monitor-js/branch/master/graph/badge.svg)](https://codecov.io/gh/microsoft/opentelemetry-azure-monitor-js)
 ![Node.js CI](https://github.com/microsoft/opentelemetry-azure-monitor-js/workflows/Node.js%20CI/badge.svg)
 
