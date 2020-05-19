@@ -36,7 +36,7 @@
     "@azure/monitor-opentelemetry-exporter": "^1.0.0-preview.1",
     "@opentelemetry/api": "^0.7.0",
     "@opentelemetry/core": "^0.7.0",
-    "@opentelemetry/node": "^0.7.0",
+    "@opentelemetry/node": "^0.8.1",
     "@opentelemetry/plugin-http": "^0.7.0",
     "@opentelemetry/plugin-https": "^0.7.0",
     "@opentelemetry/tracing": "^0.7.0",
