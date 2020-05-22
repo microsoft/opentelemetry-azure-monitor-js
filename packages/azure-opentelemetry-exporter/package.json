@@ -30,7 +30,7 @@
     "@opentelemetry/base": "^0.7.0",
     "@opentelemetry/core": "^0.8.2",
     "@opentelemetry/tracing": "^0.7.0",
-    "@opentelemetry/api": "^0.7.0"
+    "@opentelemetry/api": "^0.8.1"
   },
   "sideEffects": false,
   "keywords": [
