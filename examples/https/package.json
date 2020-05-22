@@ -38,7 +38,7 @@
     "@opentelemetry/core": "^0.8.2",
     "@opentelemetry/node": "^0.7.0",
     "@opentelemetry/plugin-http": "^0.7.0",
-    "@opentelemetry/plugin-https": "^0.7.0",
+    "@opentelemetry/plugin-https": "^0.8.2",
     "@opentelemetry/tracing": "^0.7.0",
     "express": "^4.17.1"
   },
