@@ -35,7 +35,7 @@
   "dependencies": {
     "@azure/monitor-opentelemetry-exporter": "^1.0.0-preview.1",
     "@opentelemetry/api": "^0.7.0",
-    "@opentelemetry/core": "^0.7.0",
+    "@opentelemetry/core": "^0.8.2",
     "@opentelemetry/node": "^0.7.0",
     "@opentelemetry/plugin-http": "^0.7.0",
     "@opentelemetry/plugin-https": "^0.8.2",
