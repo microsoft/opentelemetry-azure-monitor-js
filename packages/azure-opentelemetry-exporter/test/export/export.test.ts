@@ -45,7 +45,11 @@ describe('#AzureMonitorBaseExporter', () => {
           exporter['_persister'].shift((err, persistedEnvelopes) => {
             assert.strictEqual(err, null);
             assert.strictEqual(persistedEnvelopes?.length, 1);
-            assert.deepStrictEqual(persistedEnvelopes![0], toObject(envelope));
+            if (!persistedEnvelopes) {
+              assert.ok(false);
+            } else {
+              assert.deepStrictEqual(persistedEnvelopes[0], toObject(envelope));
+            }
             done();
           });
         });
