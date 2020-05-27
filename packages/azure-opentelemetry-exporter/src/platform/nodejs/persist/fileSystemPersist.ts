@@ -92,7 +92,7 @@ export class FileSystemPersist implements PersistentStorage {
     });
   }
 
-  private _storeToDisk(payload: unknown, cb: (error: Error | null, success?: boolean) => void): void {
+  private _storeToDisk(payload: string, cb: (error: Error | null, success?: boolean) => void): void {
     const directory = path.join(
       os.tmpdir(),
       FileSystemPersist.TEMPDIR_PREFIX + this._options.instrumentationKey!,
