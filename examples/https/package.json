@@ -39,7 +39,7 @@
     "@opentelemetry/node": "^0.8.1",
     "@opentelemetry/plugin-http": "^0.7.0",
     "@opentelemetry/plugin-https": "^0.8.2",
-    "@opentelemetry/tracing": "^0.7.0",
+    "@opentelemetry/tracing": "^0.8.2",
     "express": "^4.17.1"
   },
   "homepage": "https://github.com/open-telemetry/opentelemetry-js#readme"
