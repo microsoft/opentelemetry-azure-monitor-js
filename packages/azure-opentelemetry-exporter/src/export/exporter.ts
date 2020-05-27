@@ -1,6 +1,5 @@
-import { ExportResult } from '@opentelemetry/base';
 import { Logger } from '@opentelemetry/api';
-import { ConsoleLogger, LogLevel } from '@opentelemetry/core';
+import { ConsoleLogger, LogLevel, ExportResult } from '@opentelemetry/core';
 import { Envelope } from '../Declarations/Contracts';
 import { ConnectionStringParser } from '../utils/connectionStringParser';
 import { HttpSender, FileSystemPersist } from '../platform';

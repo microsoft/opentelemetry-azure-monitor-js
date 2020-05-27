@@ -1,7 +1,7 @@
 /* eslint-disable no-param-reassign */
 /* eslint-disable dot-notation */
 import * as assert from 'assert';
-import { ExportResult } from '@opentelemetry/base';
+import { ExportResult } from '@opentelemetry/core';
 import { AzureMonitorBaseExporter } from '../../src/export/exporter';
 import { TelemetryProcessor } from '../../src/types';
 import { Envelope } from '../../src/Declarations/Contracts';
