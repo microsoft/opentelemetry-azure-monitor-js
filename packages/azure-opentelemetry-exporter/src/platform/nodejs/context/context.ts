@@ -1,9 +1,8 @@
 import * as os from 'os';
 import * as fs from 'fs';
 import * as path from 'path';
-import { SDK_INFO } from '@opentelemetry/base';
 import { Logger } from '@opentelemetry/api';
-import { ConsoleLogger, LogLevel } from '@opentelemetry/core';
+import { ConsoleLogger, LogLevel, SDK_INFO } from '@opentelemetry/core';
 
 import * as Contracts from '../../../Declarations/Contracts';
 

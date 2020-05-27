@@ -33,11 +33,11 @@
   },
   "dependencies": {
     "@azure/monitor-opentelemetry-exporter": "^1.0.0-preview.1",
-    "@opentelemetry/api": "^0.8.1",
+    "@opentelemetry/api": "^0.8.2",
     "@opentelemetry/core": "^0.8.2",
-    "@opentelemetry/node": "^0.8.1",
+    "@opentelemetry/node": "^0.8.2",
     "@opentelemetry/plugin-grpc": "^0.8.2",
-    "@opentelemetry/tracing": "^0.7.0",
+    "@opentelemetry/tracing": "^0.8.2",
     "google-protobuf": "^3.11.4",
     "grpc": "^1.24.2",
     "node-pre-gyp": "^0.14.0"

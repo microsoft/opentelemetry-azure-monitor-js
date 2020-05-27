@@ -1,4 +1,4 @@
-import { ExportResult } from '@opentelemetry/base';
+import { ExportResult } from '@opentelemetry/core';
 import { ReadableSpan, SpanExporter } from '@opentelemetry/tracing';
 import { readableSpanToEnvelope } from '../utils/spanUtils';
 import { DEFAULT_EXPORTER_CONFIG, AzureExporterConfig } from '../config';

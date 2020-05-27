@@ -67,7 +67,6 @@ describe('spanUtils.ts', () => {
           code: CanonicalCode.OK,
         });
         span.end();
-        const readableSpan = span.toReadableSpan();
         const expectedTags: Tags = {
           [ai.AI_OPERATION_ID]: 'traceid',
           [ai.AI_OPERATION_PARENT_ID]: 'parentSpanId',
@@ -82,7 +81,7 @@ describe('spanUtils.ts', () => {
 
         const expectedBaseData: Partial<RequestData> = {
           source: undefined,
-          duration: msToTimeSpan(hrTimeToMilliseconds(readableSpan.duration)),
+          duration: msToTimeSpan(hrTimeToMilliseconds(span.duration)),
           id: `|${span.spanContext.traceId}.${span.spanContext.spanId}.`,
           success: true,
           responseCode: '0',
@@ -123,7 +122,6 @@ describe('spanUtils.ts', () => {
           code: CanonicalCode.OK,
         });
         span.end();
-        const readableSpan = span.toReadableSpan();
         const expectedTags: Tags = {
           [ai.AI_OPERATION_ID]: 'traceid',
           [ai.AI_OPERATION_PARENT_ID]: 'parentSpanId',
@@ -136,7 +134,7 @@ describe('spanUtils.ts', () => {
         };
 
         const expectedBaseData: Partial<RemoteDependencyData> = {
-          duration: msToTimeSpan(hrTimeToMilliseconds(readableSpan.duration)),
+          duration: msToTimeSpan(hrTimeToMilliseconds(span.duration)),
           id: `|${span.spanContext.traceId}.${span.spanContext.spanId}.`,
           success: true,
           resultCode: '0',
@@ -176,7 +174,6 @@ describe('spanUtils.ts', () => {
           code: CanonicalCode.OK,
         });
         span.end();
-        const readableSpan = span.toReadableSpan();
         const expectedTags: Tags = {
           [ai.AI_OPERATION_ID]: 'traceid',
           [ai.AI_OPERATION_PARENT_ID]: 'parentSpanId',
@@ -187,7 +184,7 @@ describe('spanUtils.ts', () => {
         };
 
         const expectedBaseData: Partial<RequestData> = {
-          duration: msToTimeSpan(hrTimeToMilliseconds(readableSpan.duration)),
+          duration: msToTimeSpan(hrTimeToMilliseconds(span.duration)),
           id: `|${span.spanContext.traceId}.${span.spanContext.spanId}.`,
           success: true,
           responseCode: '0',
@@ -224,7 +221,6 @@ describe('spanUtils.ts', () => {
           code: CanonicalCode.OK,
         });
         span.end();
-        const readableSpan = span.toReadableSpan();
         const expectedTags: Tags = {
           [ai.AI_OPERATION_ID]: 'traceid',
           [ai.AI_OPERATION_PARENT_ID]: 'parentSpanId',
@@ -235,7 +231,7 @@ describe('spanUtils.ts', () => {
         };
 
         const expectedBaseData: Partial<RemoteDependencyData> = {
-          duration: msToTimeSpan(hrTimeToMilliseconds(readableSpan.duration)),
+          duration: msToTimeSpan(hrTimeToMilliseconds(span.duration)),
           id: `|${span.spanContext.traceId}.${span.spanContext.spanId}.`,
           success: true,
           resultCode: '0',
@@ -279,13 +275,10 @@ describe('spanUtils.ts', () => {
           code: CanonicalCode.OK,
         });
         span.end();
-        const readableSpan = span.toReadableSpan();
         const expectedTags: Tags = {
           [ai.AI_OPERATION_ID]: 'traceid',
           [ai.AI_OPERATION_PARENT_ID]: 'parentSpanId',
-          [ai.AI_OPERATION_NAME]: `${readableSpan.attributes[http.HTTP_METHOD]} ${
-            readableSpan.attributes[http.HTTP_ROUTE]
-          }`,
+          [ai.AI_OPERATION_NAME]: `${span.attributes[http.HTTP_METHOD]} ${span.attributes[http.HTTP_ROUTE]}`,
         };
         const expectedProperties: Properties = {
           'extra.attribute': 'foo',
@@ -293,7 +286,7 @@ describe('spanUtils.ts', () => {
         };
 
         const expectedBaseData: RequestData = {
-          duration: msToTimeSpan(hrTimeToMilliseconds(readableSpan.duration)),
+          duration: msToTimeSpan(hrTimeToMilliseconds(span.duration)),
           id: `|${span.spanContext.traceId}.${span.spanContext.spanId}.`,
           success: true,
           responseCode: '200',
@@ -305,7 +298,7 @@ describe('spanUtils.ts', () => {
           measurements: {},
         };
 
-        const envelope = readableSpanToEnvelope(readableSpan, 'ikey');
+        const envelope = readableSpanToEnvelope(span, 'ikey');
         assertEnvelope(
           envelope,
           'Microsoft.ApplicationInsights.Request',
@@ -333,9 +326,8 @@ describe('spanUtils.ts', () => {
           code: CanonicalCode.OK,
         });
         span.end();
-        const readableSpan = span.toReadableSpan();
         const expectedTags: Tags = {
-          [ai.AI_OPERATION_ID]: readableSpan.spanContext.traceId,
+          [ai.AI_OPERATION_ID]: span.spanContext.traceId,
           [ai.AI_OPERATION_PARENT_ID]: 'parentSpanId',
         };
         const expectedProperties: Properties = {
@@ -344,7 +336,7 @@ describe('spanUtils.ts', () => {
         };
 
         const expectedBaseData: RemoteDependencyData = {
-          duration: msToTimeSpan(hrTimeToMilliseconds(readableSpan.duration)),
+          duration: msToTimeSpan(hrTimeToMilliseconds(span.duration)),
           id: `|traceid.spanId.`,
           success: true,
           resultCode: '200',
@@ -357,7 +349,7 @@ describe('spanUtils.ts', () => {
           measurements: {},
         };
 
-        const envelope = readableSpanToEnvelope(readableSpan, 'ikey');
+        const envelope = readableSpanToEnvelope(span, 'ikey');
         assertEnvelope(
           envelope,
           'Microsoft.ApplicationInsights.RemoteDependency',

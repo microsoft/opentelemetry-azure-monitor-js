@@ -1,4 +1,4 @@
-import { ExportResult } from '@opentelemetry/base';
+import { ExportResult } from '@opentelemetry/core';
 import { Envelope } from './Declarations/Contracts';
 
 export type Tags = { [key: string]: string };
