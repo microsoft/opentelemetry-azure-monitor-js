@@ -50,7 +50,7 @@ export class Context {
 
         this.tags[this.keys.applicationVersion] = Context.appVersion[packageJsonPath];
       } catch (exception) {
-        this._logger.warn('Failed to load Application version', exception);
+        this._logger.warn('Failed to load Application version');
       }
     }
   }
@@ -81,7 +81,7 @@ export class Context {
           Context.sdkVersion = packageJson.version;
         }
       } catch (exception) {
-        this._logger.warn('Failed to load Exporter version', exception);
+        this._logger.warn('Failed to load Exporter version');
       }
     }
 

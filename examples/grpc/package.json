@@ -8,8 +8,8 @@
     "build": "echo 'nothing to build'",
     "test": "echo 'nothing to test'",
     "lint": "echo 'nothing to lint'",
-    "server": "cross-env APPINSIGHTS_INSTRUMENTATIONKEY=ikey node ./server.js",
-    "client": "cross-env APPINSIGHTS_INSTRUMENTATIONKEY=ikey node ./client.js"
+    "server": "cross-env APPINSIGHTS_INSTRUMENTATIONKEY=3457abac-3812-4174-a542-e21d8d09c88f node ./server.js",
+    "client": "cross-env APPINSIGHTS_INSTRUMENTATIONKEY=3457abac-3812-4174-a542-e21d8d09c88f node ./client.js"
   },
   "repository": {
     "type": "git",
@@ -32,7 +32,7 @@
     "cross-env": "^7.0.2"
   },
   "dependencies": {
-    "@azure/monitor-opentelemetry-exporter": "^1.0.0-preview.1",
+    "@azure/monitor-opentelemetry-exporter": "1.0.0-preview.1",
     "@opentelemetry/api": "^0.8.2",
     "@opentelemetry/core": "^0.8.2",
     "@opentelemetry/node": "^0.8.2",

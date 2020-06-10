@@ -1,14 +1,13 @@
 /* eslint-disable no-param-reassign */
 /* eslint-disable dot-notation */
 import * as assert from 'assert';
+import * as nock from 'nock';
 import { ExportResult } from '@opentelemetry/core';
 import { AzureMonitorBaseExporter } from '../../src/export/exporter';
 import { TelemetryProcessor } from '../../src/types';
 import { Envelope } from '../../src/Declarations/Contracts';
 import { DEFAULT_BREEZE_ENDPOINT } from '../../src/Declarations/Constants';
 import { failedBreezeResponse, partialBreezeResponse, successfulBreezeResponse } from '../breezeTestUtils';
-
-import nock = require('nock');
 
 function toObject(obj: object) {
   return JSON.parse(JSON.stringify(obj));

@@ -16,9 +16,11 @@ module.exports = {
     'no-underscore-dangle': [ 'error', { allowAfterThis: true }],
     'node/no-unsupported-features/es-syntax': ['error', { ignores: ['modules'] }],
     'import/prefer-default-export': 'off',
-    "import/no-extraneous-dependencies": ["error", {"devDependencies": true}],
-    "node/no-unpublished-import": ["error", {
-        "allowModules": ["@opentelemetry/api", "@opentelemetry/tracing"]
+    "import/no-extraneous-dependencies": ["error", {
+      "devDependencies": ["**/*.test.ts"]
+    }],
+    "node/no-extraneous-import": ["error", {
+      "allowModules": ["nock"]
     }],
   },
   parser: '@typescript-eslint/parser',
