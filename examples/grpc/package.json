@@ -1,7 +1,7 @@
 {
   "name": "grpc-example",
   "private": true,
-  "version": "0.7.0",
+  "version": "1.0.0-preview.2",
   "description": "Example of gRPC integration with OpenTelemetry",
   "main": "index.js",
   "scripts": {
@@ -32,7 +32,7 @@
     "cross-env": "^7.0.2"
   },
   "dependencies": {
-    "@azure/monitor-opentelemetry-exporter": "1.0.0-preview.1",
+    "@azure/monitor-opentelemetry-exporter": "^1.0.0-preview.2",
     "@opentelemetry/api": "^0.8.2",
     "@opentelemetry/core": "^0.8.2",
     "@opentelemetry/node": "^0.8.2",
