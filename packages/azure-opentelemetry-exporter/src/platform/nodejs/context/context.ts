@@ -87,7 +87,7 @@ export class Context {
 
     this.tags[
       this.keys.internalSdkVersion
-    ] = `node${Context.nodeVersion}|exporter:${Context.sdkVersion}|ot:${SDK_INFO.VERSION}`;
+    ] = `node${Context.nodeVersion}:ot${SDK_INFO.VERSION}:ext${Context.sdkVersion}`;
   }
 }
 
