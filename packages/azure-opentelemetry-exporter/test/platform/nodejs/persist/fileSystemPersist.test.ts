@@ -65,7 +65,9 @@ describe('FileSystemPersist', () => {
   afterEach((done) => {
     fs.readdir(tempDir, (err, files) => {
       if (err) {
-        done(err);
+        // eslint-disable-next-line no-console
+        console.error(err);
+        done();
       } else {
         assert.deepStrictEqual(files, []);
         done();
@@ -92,6 +94,15 @@ describe('FileSystemPersist', () => {
   });
 
   describe('#shift()', () => {
+    it('should not crash if file does not exist', (done) => {
+      const persister = new FileSystemPersist({ instrumentationKey });
+      assert.doesNotThrow(() => {
+        persister.shift((err) => {
+          assert.ok(err);
+          done();
+        });
+      });
+    });
     it('should get the first file on disk and return it', (done) => {
       const persister = new FileSystemPersist({ instrumentationKey });
 

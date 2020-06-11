@@ -58,7 +58,9 @@ export class FileSystemPersist implements PersistentStorage {
     );
 
     fs.stat(tempDir, (statErr: Error | null, stats: fs.Stats) => {
-      if (stats.isDirectory()) {
+      if (statErr) {
+        callback(statErr);
+      } else if (stats.isDirectory()) {
         fs.readdir(tempDir, (error, origFiles) => {
           if (!error) {
             const files = origFiles.filter((f) =>

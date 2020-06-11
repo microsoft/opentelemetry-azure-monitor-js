@@ -1,10 +1,9 @@
 import * as assert from 'assert';
+import * as nock from 'nock';
 import { HttpSender } from '../../../src/platform/nodejs/httpSender';
 import { Envelope } from '../../../src/Declarations/Contracts';
 import { DEFAULT_BREEZE_ENDPOINT } from '../../../src/Declarations/Constants';
 import { successfulBreezeResponse, failedBreezeResponse, partialBreezeResponse } from '../../breezeTestUtils';
-
-import nock = require('nock');
 
 describe('HttpSender', () => {
   const scope = nock(DEFAULT_BREEZE_ENDPOINT).post('/v2/track');
