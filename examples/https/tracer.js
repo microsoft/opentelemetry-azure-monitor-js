@@ -14,14 +14,12 @@ module.exports = () => {
       http: {
         enabled: true,
         path: '@opentelemetry/plugin-http',
-        // Ignore Application Insights Ingestion Server
-        ignoreUrls: [new RegExp(/dc.visualstudio.com/i)],
       },
       https: {
         enabled: true,
         path: '@opentelemetry/plugin-https',
         // Ignore Application Insights Ingestion Server
-        ignoreUrls: [new RegExp(/dc.visualstudio.com/i)],
+        ignoreOutgoingUrls: [new RegExp(/dc.services.visualstudio.com/i)],
       },
     },
   });

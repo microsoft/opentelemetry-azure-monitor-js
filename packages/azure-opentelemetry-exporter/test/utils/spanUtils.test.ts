@@ -25,6 +25,7 @@ function assertEnvelope(
   expectedTags: Tags,
   expectedProperties: Properties,
   expectedBaseData: Partial<RequestData | RemoteDependencyData>,
+  expectedTime?: string,
 ) {
   assert.strictEqual(Context.sdkVersion, '1.0.0-preview.2');
   assert.strictEqual(Object.keys(Context.appVersion).length, 1);
@@ -38,6 +39,10 @@ function assertEnvelope(
   assert.ok(envelope.time);
   assert.ok(envelope.ver);
   assert.ok(envelope.data);
+
+  if (expectedTime) {
+    assert.strictEqual(envelope.time, expectedTime);
+  }
 
   assert.deepStrictEqual(envelope.tags, { ...context.tags, ...expectedTags });
   assert.deepStrictEqual(envelope.data?.baseData?.properties, expectedProperties);
@@ -174,6 +179,7 @@ describe('spanUtils.ts', () => {
           code: CanonicalCode.OK,
         });
         span.end();
+        const expectedTime = new Date(hrTimeToMilliseconds(span.startTime)).toISOString();
         const expectedTags: Tags = {
           [ai.AI_OPERATION_ID]: 'traceid',
           [ai.AI_OPERATION_PARENT_ID]: 'parentSpanId',
@@ -203,6 +209,7 @@ describe('spanUtils.ts', () => {
           expectedTags,
           expectedProperties,
           expectedBaseData,
+          expectedTime,
         );
       });
 
