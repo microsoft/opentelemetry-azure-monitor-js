@@ -29,7 +29,7 @@
   },
   "dependencies": {
     "@opentelemetry/api": "^0.8.2",
-    "@opentelemetry/core": "^0.8.2",
+    "@opentelemetry/core": "^0.9.0",
     "@opentelemetry/tracing": "^0.8.2"
   },
   "sideEffects": false,
