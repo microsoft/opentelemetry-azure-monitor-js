@@ -202,7 +202,7 @@ export function readableSpanToEnvelope(
 
   envelope.data.baseData = { ...data, properties };
   envelope.tags = tags;
-  envelope.time = new Date(Date.now() - hrTimeToMilliseconds(span.duration)).toISOString();
+  envelope.time = new Date(hrTimeToMilliseconds(span.startTime)).toISOString();
   envelope.iKey = instrumentationKey;
   envelope.ver = 1;
   return envelope;

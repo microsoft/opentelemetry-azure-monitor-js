@@ -23,7 +23,14 @@ const { NodeTracerProvider } = require('@opentelemetry/node');
 const { BatchSpanProcessor } = require('@opentelemetry/tracing');
 
 // Use your existing provider
-const provider = new NodeTracerProvider();
+const provider = new NodeTracerProvider({
+  plugins: {
+    https: {
+      // Ignore Application Insights Ingestion Server
+      ignoreOutgoingUrls: [new RegExp(/dc.services.visualstudio.com/i)],
+    },
+  },
+});
 provider.register();
 
 // Create an exporter instance
