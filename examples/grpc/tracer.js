@@ -15,6 +15,10 @@ module.exports = () => {
         enabled: true,
         path: '@opentelemetry/plugin-grpc',
       },
+      https: {
+        // Ignore Application Insights Ingestion Server
+        ignoreOutgoingUrls: [new RegExp(/dc.services.visualstudio.com/i)],
+      }
     },
   });
 
