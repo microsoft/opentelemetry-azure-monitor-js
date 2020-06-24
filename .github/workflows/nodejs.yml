@@ -35,7 +35,7 @@ jobs:
       run: |
         npm run report
     - name: Upload coverage to Codecov
-      if: ${{ matrix.node-version == '14.x' }}
+      if: ${{ matrix.node-version == '14.x' && matrix.os == 'ubuntu-latest' }}
       uses: codecov/codecov-action@v1
       with:
         file: ./packages/azure-opentelemetry-exporter/coverage/coverage-final.json
