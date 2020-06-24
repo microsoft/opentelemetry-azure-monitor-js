@@ -61,7 +61,7 @@ function createPropertiesFromSpan(span: ReadableSpan): Properties {
     id: link.context.spanId,
   }));
 
-  properties[MS_LINKS] = links;
+  properties[MS_LINKS] = JSON.stringify(links);
   return properties;
 }
 

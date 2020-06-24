@@ -81,7 +81,7 @@ describe('spanUtils.ts', () => {
           'extra.attribute': 'foo',
           [grpc.GRPC_ERROR_MESSAGE]: 'some error message',
           [grpc.GRPC_ERROR_NAME]: 'some error name',
-          [ai.MS_LINKS]: [],
+          [ai.MS_LINKS]: '[]',
         };
 
         const expectedBaseData: Partial<RequestData> = {
@@ -135,7 +135,7 @@ describe('spanUtils.ts', () => {
           'extra.attribute': 'foo',
           [grpc.GRPC_ERROR_MESSAGE]: 'some error message',
           [grpc.GRPC_ERROR_NAME]: 'some error name',
-          [ai.MS_LINKS]: [],
+          [ai.MS_LINKS]: '[]',
         };
 
         const expectedBaseData: Partial<RemoteDependencyData> = {
@@ -186,7 +186,7 @@ describe('spanUtils.ts', () => {
         };
         const expectedProperties: Properties = {
           'extra.attribute': 'foo',
-          [ai.MS_LINKS]: [],
+          [ai.MS_LINKS]: '[]',
         };
 
         const expectedBaseData: Partial<RequestData> = {
@@ -234,7 +234,7 @@ describe('spanUtils.ts', () => {
         };
         const expectedProperties: Properties = {
           'extra.attribute': 'foo',
-          [ai.MS_LINKS]: [],
+          [ai.MS_LINKS]: '[]',
         };
 
         const expectedBaseData: Partial<RemoteDependencyData> = {
@@ -289,7 +289,7 @@ describe('spanUtils.ts', () => {
         };
         const expectedProperties: Properties = {
           'extra.attribute': 'foo',
-          [ai.MS_LINKS]: [],
+          [ai.MS_LINKS]: '[]',
         };
 
         const expectedBaseData: RequestData = {
@@ -339,7 +339,7 @@ describe('spanUtils.ts', () => {
         };
         const expectedProperties: Properties = {
           'extra.attribute': 'foo',
-          [ai.MS_LINKS]: [],
+          [ai.MS_LINKS]: '[]',
         };
 
         const expectedBaseData: RemoteDependencyData = {
