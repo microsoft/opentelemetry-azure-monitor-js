@@ -59,7 +59,11 @@ export class FileSystemPersist implements PersistentStorage {
 
     fs.stat(tempDir, (statErr: Error | null, stats: fs.Stats) => {
       if (statErr) {
-        callback(statErr);
+        if (((statErr as unknown) as { code: string }).code === 'ENOENT') {
+          callback(null);
+        } else {
+          callback(statErr);
+        }
       } else if (stats.isDirectory()) {
         fs.readdir(tempDir, (error, origFiles) => {
           if (!error) {
