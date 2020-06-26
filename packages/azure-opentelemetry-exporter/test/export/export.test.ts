@@ -8,6 +8,7 @@ import { TelemetryProcessor } from '../../src/types';
 import { Envelope } from '../../src/Declarations/Contracts';
 import { DEFAULT_BREEZE_ENDPOINT } from '../../src/Declarations/Constants';
 import { failedBreezeResponse, partialBreezeResponse, successfulBreezeResponse } from '../breezeTestUtils';
+import { FileSystemPersist } from '../../src/platform';
 
 function toObject(obj: object) {
   return JSON.parse(JSON.stringify(obj));
@@ -25,6 +26,16 @@ describe('#AzureMonitorBaseExporter', () => {
       return this._telemetryProcessors;
     }
   }
+
+  it('should pass options to persister', () => {
+    const exporter = new TestExporter();
+    assert.ok(exporter['_options'].instrumentationKey);
+    assert.strictEqual(
+      (exporter['_persister'] as FileSystemPersist)['_options'].instrumentationKey,
+      exporter['_options'].instrumentationKey,
+    );
+    assert.deepStrictEqual((exporter['_persister'] as FileSystemPersist)['_options'], exporter['_options']);
+  });
 
   describe('Sender/Persister Controller', () => {
     describe('#exportEnvelopes()', () => {

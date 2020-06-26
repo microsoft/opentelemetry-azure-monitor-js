@@ -52,7 +52,7 @@ export abstract class AzureMonitorBaseExporter implements BaseExporter {
 
     this._telemetryProcessors = [];
     this._sender = new HttpSender();
-    this._persister = new FileSystemPersist();
+    this._persister = new FileSystemPersist(this._options);
     this._retryTimer = null;
     this._logger.debug('AzureMonitorTraceExporter was successfully setup');
   }
