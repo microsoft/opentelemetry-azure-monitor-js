@@ -1,5 +1,6 @@
-import { Logger } from '@opentelemetry/api';
-import { ConnectionString, ConnectionStringKey } from '../Declarations/Contracts';
+import type { Logger } from '@opentelemetry/api';
+import { NoopLogger } from '@opentelemetry/core';
+import type { ConnectionString, ConnectionStringKey } from '../Declarations/Contracts';
 
 import * as Constants from '../Declarations/Constants';
 
@@ -8,7 +9,7 @@ export class ConnectionStringParser {
 
   private static readonly FIELD_KEY_VALUE_SEPARATOR = '=';
 
-  public static parse(connectionString?: string, logger?: Logger): ConnectionString {
+  public static parse(connectionString?: string, logger: Logger = new NoopLogger()): ConnectionString {
     if (!connectionString) {
       return {};
     }
@@ -25,13 +26,11 @@ export class ConnectionStringParser {
         const value = kvParts[1];
         return { ...fields, [key]: value };
       }
-      if (logger) {
-        logger.error(
-          `Connection string key-value pair is invalid: ${kv}`,
-          `Entire connection string will be discarded`,
-          connectionString,
-        );
-      }
+      logger.error(
+        `Connection string key-value pair is invalid: ${kv}`,
+        `Entire connection string will be discarded`,
+        connectionString,
+      );
       isValid = false;
       return fields;
     }, {});
@@ -50,19 +49,14 @@ export class ConnectionStringParser {
       // apply the default endpoints
       result.ingestionendpoint = result.ingestionendpoint || Constants.DEFAULT_BREEZE_ENDPOINT;
       result.liveendpoint = result.liveendpoint || Constants.DEFAULT_LIVEMETRICS_ENDPOINT;
-      if (result.authorization && result.authorization.toLowerCase() !== 'ikey' && logger) {
+      if (result.authorization && result.authorization.toLowerCase() !== 'ikey') {
         logger.warn(
           `Connection String contains an unsupported 'Authorization' value: ${result.authorization}. Defaulting to 'Authorization=ikey'. Instrumentation Key ${result.instrumentationkey}`,
         );
       }
     }
 
-    if (logger) {
-      logger.error(
-        'An invalid connection string was passed in. There may be telemetry loss',
-        connectionString,
-      );
-    }
+    logger.error('An invalid connection string was passed in. There may be telemetry loss', connectionString);
     return result;
   }
 }
