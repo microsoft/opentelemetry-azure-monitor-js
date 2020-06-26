@@ -94,15 +94,24 @@ describe('FileSystemPersist', () => {
   });
 
   describe('#shift()', () => {
+    it('should not crash if folder does not exist', (done) => {
+      const persister = new FileSystemPersist({ instrumentationKey });
+      persister.shift((err) => {
+        assert.strictEqual(err, null);
+        done();
+      });
+    });
+
     it('should not crash if file does not exist', (done) => {
       const persister = new FileSystemPersist({ instrumentationKey });
-      assert.doesNotThrow(() => {
+      fs.mkdir(tempDir, () => {
         persister.shift((err) => {
-          assert.ok(err);
+          assert.strictEqual(err, null);
           done();
         });
       });
     });
+
     it('should get the first file on disk and return it', (done) => {
       const persister = new FileSystemPersist({ instrumentationKey });
 
