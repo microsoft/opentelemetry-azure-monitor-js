@@ -23,10 +23,29 @@ export class Context {
 
   public static nodeVersion: string = '';
 
+  /**
+   * Add extra ../ to access on environments not using ts-node
+   */
+  private static readonly JS_NODE_PREFIX = '../';
+
+  /**
+   * Path to azure-opentelemetry-exporter
+   */
+  private static readonly ROOT_PATH = '../../../../';
+
   constructor(
     private _logger: Logger = new ConsoleLogger(LogLevel.WARN),
-    private _exporterPrefix = '../',
-    private _appPrefix = '../../../',
+    /**
+     * Path to this module's `package.json` relative to
+     * `Context.ROOT_PATH`
+     */
+    private _exporterPrefix = './',
+    /**
+     * Path to end user application folder which contains `package.json`
+     * relative to `Context.ROOT_PATH`
+     * @default `../../`
+     */
+    private _appPrefix = '../../',
   ) {
     this.keys = new Contracts.ContextTagKeys();
     this.tags = <{ [key: string]: string }>{};
@@ -39,19 +58,38 @@ export class Context {
   private _loadApplicationContext() {
     if (Object.keys(Context.appVersion).length === 0) {
       // note: this should return the host package.json
-      // note: this does not require this._prefix
-      const packageJsonPath = path.resolve(__dirname, `${this._appPrefix}../../../../package.json`);
-      Context.appVersion[packageJsonPath] = 'unknown';
-      try {
-        const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
-        if (packageJson && typeof packageJson.version === 'string') {
-          Context.appVersion[packageJsonPath] = packageJson.version;
-        }
+      let packageJson: { version: string } | null = null;
+      const packageJsonPath = path.resolve(
+        __dirname,
+        Context.JS_NODE_PREFIX,
+        this._appPrefix,
+        Context.ROOT_PATH,
+        './package.json',
+      );
+      const packageJsonPathTsNode = path.resolve(
+        __dirname,
+        this._appPrefix,
+        Context.ROOT_PATH,
+        './package.json',
+      );
 
-        this.tags[this.keys.applicationVersion] = Context.appVersion[packageJsonPath];
-      } catch (exception) {
-        this._logger.warn('Failed to load Application version');
+      Context.appVersion[packageJsonPath] = 'unknown';
+
+      try {
+        packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
+      } catch (_) {
+        try {
+          packageJson = JSON.parse(fs.readFileSync(packageJsonPathTsNode, 'utf8'));
+        } catch (exception) {
+          this._logger.warn('Failed to load Application version', exception);
+        }
       }
+
+      if (packageJson && typeof packageJson.version === 'string') {
+        Context.appVersion[packageJsonPath] = packageJson.version;
+      }
+
+      this.tags[this.keys.applicationVersion] = Context.appVersion[packageJsonPath];
     }
   }
 
@@ -68,20 +106,39 @@ export class Context {
 
   private _loadInternalContext() {
     if (!Context.sdkVersion) {
+      let packageJson: { version: string } | null = null;
       const { node } = process.versions;
       [Context.nodeVersion] = node.split('.');
 
       // note: this should return the sdk package.json
-      const packageJsonPath = path.resolve(__dirname, `${this._exporterPrefix}../../../../package.json`);
+      const packageJsonPath = path.resolve(
+        __dirname,
+        Context.JS_NODE_PREFIX,
+        this._exporterPrefix,
+        Context.ROOT_PATH,
+        './package.json',
+      );
+      const packageJsonPathTsNode = path.resolve(
+        __dirname,
+        this._exporterPrefix,
+        Context.ROOT_PATH,
+        './package.json',
+      );
 
       Context.sdkVersion = 'unknown';
       try {
-        const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
-        if (packageJson && typeof packageJson.version === 'string') {
-          Context.sdkVersion = packageJson.version;
+        packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
+      } catch (_) {
+        try {
+          packageJson = JSON.parse(fs.readFileSync(packageJsonPathTsNode, 'utf8'));
+        } catch (exception) {
+          this._logger.warn('Failed to load Exporter version', exception);
+          throw exception;
         }
-      } catch (exception) {
-        this._logger.warn('Failed to load Exporter version');
+      }
+
+      if (packageJson && typeof packageJson.version === 'string') {
+        Context.sdkVersion = packageJson.version;
       }
     }
 
