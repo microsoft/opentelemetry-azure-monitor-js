@@ -45,7 +45,7 @@ export class Context {
      * relative to `Context.ROOT_PATH`
      * @default `../../`
      */
-    private _appPrefix = '../../',
+    private _appPrefix = '../../../',
   ) {
     this.keys = new Contracts.ContextTagKeys();
     this.tags = <{ [key: string]: string }>{};

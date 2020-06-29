@@ -3,7 +3,7 @@
 
 # Except for...
 !build/src/**
-!src
+!src/**
 !package.json
 !README.md
 !SECURITY.md
