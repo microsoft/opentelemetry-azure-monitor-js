@@ -27,7 +27,7 @@ function assertEnvelope(
   expectedBaseData: Partial<RequestData | RemoteDependencyData>,
   expectedTime?: string,
 ) {
-  assert.strictEqual(Context.sdkVersion, '1.0.0-preview.3');
+  assert.strictEqual(Context.sdkVersion, '1.0.0-preview.4');
   assert.strictEqual(Object.keys(Context.appVersion).length, 1);
   assert.notDeepStrictEqual(Context.appVersion, 'unknown');
 
