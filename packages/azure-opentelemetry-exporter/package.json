@@ -24,12 +24,29 @@
     "url": "https://github.com/microsoft/opentelemetry-azure-monitor-js"
   },
   "devDependencies": {
+    "@types/mocha": "^7.0.2",
+    "@types/node": "^14.0.14",
+    "@typescript-eslint/eslint-plugin": "^2.34.0",
+    "c8": "^7.2.0",
+    "eslint": "^6.8.0",
+    "eslint-config-airbnb-typescript": "^7.2.0",
+    "eslint-config-prettier": "^6.10.1",
+    "eslint-plugin-import": "^2.21.2",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-prettier": "^3.1.4",
+    "lerna": "^3.22.1",
+    "mocha": "^7.2.0",
     "nock": "^13.0.0",
+    "prettier": "^2.0.2",
+    "rimraf": "^3.0.2",
+    "sinon": "^9.0.1",
+    "ts-mocha": "^7.0.0",
     "typescript": "^3.9.5"
   },
   "dependencies": {
     "@opentelemetry/api": "^0.9.0",
     "@opentelemetry/core": "^0.9.0",
+    "@opentelemetry/semantic-conventions": "^0.9.0",
     "@opentelemetry/tracing": "^0.9.0"
   },
   "sideEffects": false,

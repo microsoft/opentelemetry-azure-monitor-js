@@ -1,4 +1,6 @@
-export const HTTP_METHOD = 'http.method';
-export const HTTP_URL = 'http.url';
-export const HTTP_ROUTE = 'http.route';
-export const HTTP_STATUS_CODE = 'http.status_code';
+import * as conventions from '@opentelemetry/semantic-conventions';
+
+export const { HTTP_METHOD } = conventions.HttpAttribute;
+export const { HTTP_URL } = conventions.HttpAttribute;
+export const { HTTP_ROUTE } = conventions.HttpAttribute;
+export const { HTTP_STATUS_CODE } = conventions.HttpAttribute;
