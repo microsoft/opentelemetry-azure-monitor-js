@@ -1,3 +1,5 @@
+> **This repository has been moved to the [Azure SDK for JavaScript](https://github.com/azure/azure-sdk-for-js/) repository.** In order to improve discoverability and share common dependencies & tests, the OpenTelemetry Azure Monitor for JS exporter has moved to the common location containing all Azure SDKs.
+
 
 # Azure Monitor JavaScript Exporter for OpenTelemetry
 
